@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Healthy Home's Foods - Premium Enterprise Dashboard</title>
+    
+    <link rel="manifest" href='data:application/manifest+json;base64,ewogICJuYW1lIjogIkhlYWx0aHkgSG9tZSdzIEZvb2RzIiwKICAic2hvcnRfbmFtZSI6ICJIZWFsdGh5SG9tZSIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMDU5NjY5IiwKICAidGhlbWVfY29sb3IiOiAiIzA1OTY2OSIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImh0dHBzOi8vY2RuLWljb25zLXBuZy5mbGF0aWNvbi5jb20vNTEyLzMwNjIvMzA2Mjk3My5wbmciLAogICAgICAic2l6ZXMiOiAiMTkyeDE5MiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIKICAgIH0KICBdCn0='>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Firebase SDK (Cloud Backup) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght=300;400;500;600;700&family=Mukta+Malar:wght=400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Poppins', 'Mukta Malar', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .active-filter-green { background-color: #059669 !important; color: white !important; border-color: #059669 !important; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col pb-20 md:pb-6 transition-all duration-300">
+
+    <!-- Top Navigation Header -->
+    <header id="app-header" class="bg-emerald-600 text-white shadow-md sticky top-0 z-40 px-4 py-3 rounded-b-2xl">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div id="biz-logo-container" class="bg-white p-1 rounded-full shadow-inner flex items-center justify-center w-11 h-11 overflow-hidden border-2 border-white">
+                    <i class="fa-solid fa-bowl-food text-emerald-600 text-xl" id="default-logo-icon"></i>
+                </div>
+                <div>
+                    <h1 class="text-base md:text-lg font-bold tracking-tight" id="header-biz-name">Healthy Home's Foods</h1>
+                    <p class="text-[10px] text-emerald-100 font-semibold" id="lbl-subtitle">மந்த்லி கணக்கு மற்றும் டியூ டிராக்கர்</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="bg-emerald-800/50 text-white px-2 py-1 rounded-xl text-[9px] font-bold flex items-center space-x-1"><i class="fa-solid fa-cloud text-emerald-300"></i><span>Cloud Sync ON</span></span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 max-w-6xl mx-auto w-full px-3 pt-4 space-y-4">
+        
+        <!-- Metrics Stats Board -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-center space-x-3">
+                <div class="p-2.5 bg-emerald-50 rounded-xl text-emerald-600 text-sm"><i class="fa-solid fa-users"></i></div>
+                <div><span class="text-[10px] text-slate-400 block font-bold" id="lbl-total-cust">கஸ்டமர்கள்</span><span id="stat-total-cust" class="text-base font-bold text-slate-700">0</span></div>
+            </div>
+            <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-center space-x-3">
+                <div class="p-2.5 bg-blue-50 rounded-xl text-blue-600 text-sm"><i class="fa-solid fa-truck"></i></div>
+                <div><span class="text-[10px] text-slate-400 block font-bold" id="lbl-today-deliv">இன்றைய விநியோகம்</span><span id="stat-today-deliveries" class="text-xs font-bold text-slate-700">B:0 | L:0 | D:0</span></div>
+            </div>
+            <div onclick="openEarningsModal()" class="bg-white p-3 rounded-2xl border border-emerald-200 shadow-sm flex items-center space-x-3 cursor-pointer hover:bg-emerald-50/40 transition">
+                <div class="p-2.5 bg-amber-50 rounded-xl text-amber-600 text-sm"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+                <div><span class="text-[10px] text-slate-400 block font-bold" id="lbl-total-earn">வசூலானது 👁</span><span id="stat-total-earnings" class="text-base font-bold text-emerald-600">₹0</span></div>
+            </div>
+            <div onclick="openExpensesSummaryModal()" class="bg-white p-3 rounded-2xl border border-rose-200 shadow-sm flex items-center space-x-3 cursor-pointer hover:bg-rose-50/40 transition">
+                <div class="p-2.5 bg-rose-50 rounded-xl text-rose-600 text-sm"><i class="fa-solid fa-receipt"></i></div>
+                <div><span class="text-[10px] text-slate-400 block font-bold" id="lbl-total-exp">மொத்தச் செலவு 👁</span><span id="stat-total-expenses" class="text-base font-bold text-rose-600">₹0</span></div>
+            </div>
+        </div>
+
+        <!-- Desktop Tabs -->
+        <div class="hidden md:flex bg-white p-1.5 rounded-xl border border-slate-200 shadow-sm gap-2">
+            <button id="d-tab-customers" onclick="switchView('customers')" class="flex-1 py-2.5 text-center text-xs font-bold rounded-lg transition-all bg-emerald-600 text-white"><span id="tab-lbl-cust">வாடிக்கையாளர்கள்</span></button>
+            <button id="d-tab-delivery" onclick="switchView('delivery')" class="flex-1 py-2.5 text-center text-xs font-bold rounded-lg text-slate-500 hover:bg-slate-50"><span id="tab-lbl-deliv">விநியோகத் திட்டம்</span></button>
+            <button id="d-tab-leave" onclick="switchView('leave')" class="flex-1 py-2.5 text-center text-xs font-bold rounded-lg text-slate-500 hover:bg-slate-50"><span id="tab-lbl-leaves">லீவ் & மெனு பிளான்</span></button>
+            <button id="d-tab-kitchen" onclick="switchView('kitchen')" class="flex-1 py-2.5 text-center text-xs font-bold rounded-lg text-slate-500 hover:bg-slate-50"><span id="tab-lbl-kitchen">சமையலறை கணக்கு</span></button>
+            <button id="d-tab-staff" onclick="switchView('staff')" class="flex-1 py-2.5 text-center text-xs font-bold rounded-lg text-slate-500 hover:bg-slate-50"><span id="tab-lbl-staff">டெலிவரி ஆட்கள்</span></button>
+            <button id="d-tab-expenses" onclick="switchView('expenses')" class="flex-1 py-2.5 text-center text-xs font-bold rounded-lg text-slate-500 hover:bg-slate-50"><span id="tab-lbl-accounts">கணக்கு & செலவுகள்</span></button>
+        </div>
+
+        <!-- VIEW 1: CUSTOMERS -->
+        <div id="view-customers" class="space-y-4">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div class="flex items-center space-x-2">
+                    <h2 class="font-bold text-base text-slate-700" id="lbl-cust-title">வாடிக்கையாளர் கணக்கு டிராக்கர்</h2>
+                    <span class="text-xs bg-slate-200 text-slate-600 px-2.5 py-0.5 rounded-full font-bold" id="badge-cust-count">0 Customers</span>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="openAddModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-sm transition" id="btn-add-cust-lbl">புதிய கஸ்டமர் சேர்</button>
+                    <!-- Google Sheet Backup -->
+                    <button onclick="exportAllToSheet()" class="bg-teal-600 hover:bg-teal-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-sm transition"><i class="fa-brands fa-google-drive mr-1"></i> Sync All to Sheet</button>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <input type="text" id="search-bar" onkeyup="filterCustomers()" placeholder="தேடுக..." class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500 shadow-sm md:col-span-2">
+                <div class="flex bg-white p-1 rounded-xl border border-slate-200 shadow-sm gap-1">
+                    <button id="btn-all" onclick="applyFilter('all')" class="flex-1 py-1.5 text-center text-[10px] font-bold rounded-lg transition-all active-filter-green"><span id="lbl-all-filter">அனைவரும்</span></button>
+                    <button id="btn-trial" onclick="applyFilter('trial')" class="flex-1 py-1.5 text-center text-[10px] font-bold rounded-lg text-slate-500 hover:bg-slate-50 transition-all"><span id="lbl-trial-filter">ட்ரையல்</span></button>
+                    <button id="btn-unpaid" onclick="applyFilter('unpaid')" class="flex-1 py-1.5 text-center text-[10px] font-bold rounded-lg text-slate-500 hover:bg-slate-50 transition-all"><span id="lbl-unpaid-filter">நிலுவை</span></button>
+                </div>
+            </div>
+            <div id="customer-cards-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+        </div>
+
+        <!-- VIEW 2: DELIVERY -->
+        <div id="view-delivery" class="space-y-4 hidden">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div><h2 class="font-bold text-base text-slate-700" id="lbl-deliv-title">தினசரி உணவு விநியோகப் பட்டியல்</h2></div>
+                <button onclick="printDeliveryChecklist()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2.5 rounded-xl text-xs font-bold transition">Print Checklist</button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div class="flex bg-white p-1 rounded-xl border border-slate-200 shadow-sm gap-1 md:col-span-2">
+                    <button onclick="setMealSession('all')" id="meal-all" class="flex-1 py-2 text-center text-xs font-bold rounded-lg bg-emerald-600 text-white shadow">அனைத்தும்</button>
+                    <button onclick="setMealSession('breakfast')" id="meal-b" class="flex-1 py-2 text-center text-xs font-bold rounded-lg text-slate-500">Breakfast</button>
+                    <button onclick="setMealSession('lunch')" id="meal-l" class="flex-1 py-2 text-center text-xs font-bold rounded-lg text-slate-500">Lunch</button>
+                    <button onclick="setMealSession('dinner')" id="meal-d" class="flex-1 py-2 text-center text-xs font-bold rounded-lg text-slate-500">Dinner</button>
+                </div>
+                <select id="route-staff-filter" onchange="renderDeliveryChecklist()" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 shadow-sm">
+                    <option value="all">அனைத்து ஊழியர்கள்</option>
+                </select>
+            </div>
+            <div id="delivery-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+        </div>
+
+        <!-- VIEW 3: LEAVE & WEEKLY PLAN -->
+        <div id="view-leave" class="space-y-4 hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div class="bg-white p-4 rounded-2xl border shadow-sm space-y-3 h-fit">
+                    <h3 class="font-bold text-xs text-emerald-800 uppercase tracking-wider" id="lbl-leave-reg-title">கஸ்டமர் லீவ் பதிவு</h3>
+                    <form id="leave-form" onsubmit="saveLeave(event)" class="space-y-3 text-xs">
+                        <div><label class="block font-bold text-slate-400 mb-1" id="lbl-leave-cust">கஸ்டமர் பெயர் *</label><select id="leave-cust-id" required class="w-full p-2 bg-slate-50 border rounded-xl"></select></div>
+                        <div><label class="block font-bold text-slate-400 mb-1" id="lbl-leave-date">தேதி *</label><input type="date" id="leave-date" required class="w-full p-2 bg-slate-50 border rounded-xl" onchange="calculateContinuousLeaveExtension()"></div>
+                        <div><label class="block font-bold text-slate-400 mb-1" id="lbl-leave-days">நாட்கள் *</label><input type="number" id="leave-days-count" min="1" value="1" required class="w-full p-2 bg-slate-50 border rounded-xl" oninput="calculateContinuousLeaveExtension()"></div>
+                        <div class="bg-emerald-50 p-2 rounded-xl text-center"><span class="block text-[10px] font-bold text-emerald-800 uppercase" id="lbl-calculated-extend">புதிய முடிவு தேதி</span><span id="leave-extended-preview" class="font-bold text-emerald-700">-</span></div>
+                        <button type="submit" class="w-full py-2 bg-emerald-600 text-white font-bold rounded-xl" id="btn-save-leave-lbl">லீவ் சேமி</button>
+                    </form>
+                </div>
+                <div class="lg:col-span-2 bg-white p-4 rounded-2xl border shadow-sm space-y-2">
+                    <h3 class="font-bold text-xs text-slate-400 uppercase" id="lbl-leave-history">லீவ் வரலாறு / Skip Logs</h3>
+                    <div class="max-h-48 overflow-y-auto"><table class="w-full text-left text-xs"><thead><tr class="border-b bg-slate-50 text-slate-500 font-bold"><th class="p-2">கஸ்டமர்</th><th class="p-2">லீவ் நாட்கள்</th><th class="p-2">முடிவு தேதி</th><th class="p-2 text-center">அழி</th></tr></thead><tbody id="leave-history-table"></tbody></table></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 4: KITCHEN PRODUCTION -->
+        <div id="view-kitchen" class="space-y-4 hidden">
+            <div class="bg-white p-4 rounded-2xl border shadow-sm space-y-3">
+                <div class="flex justify-between items-center border-b pb-2">
+                    <h2 class="font-bold text-base text-slate-800"><i class="fa-solid fa-kitchen-set text-emerald-600"></i> சமையலறை மளிகை தேவை கணக்கீடு</h2>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-xl border grid grid-cols-2 md:grid-cols-4 gap-4 text-xs font-semibold">
+                    <div><label class="block text-[10px] text-slate-400 uppercase mb-1">அரிசி அளவு</label><div class="flex items-center space-x-1"><input type="number" id="portion-rice" value="120" class="w-16 p-1 border rounded text-center" oninput="recalculateKitchenGroceryPortions()"><span>g</span></div></div>
+                    <div><label class="block text-[10px] text-slate-400 uppercase mb-1">பருப்பு அளவு</label><div class="flex items-center space-x-1"><input type="number" id="portion-dal" value="30" class="w-16 p-1 border rounded text-center" oninput="recalculateKitchenGroceryPortions()"><span>g</span></div></div>
+                    <div><label class="block text-[10px] text-slate-400 uppercase mb-1">காய்கறிகள்</label><div class="flex items-center space-x-1"><input type="number" id="portion-veg" value="100" class="w-16 p-1 border rounded text-center" oninput="recalculateKitchenGroceryPortions()"><span>g</span></div></div>
+                    <div><label class="block text-[10px] text-slate-400 uppercase mb-1">எண்ணெய்</label><div class="flex items-center space-x-1"><input type="number" id="portion-oil" value="15" class="w-16 p-1 border rounded text-center" oninput="recalculateKitchenGroceryPortions()"><span>ml</span></div></div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
+                    <div class="bg-emerald-50 p-4 rounded-xl border flex items-center justify-between"><div><span class="text-[10px] text-slate-400 font-bold block">மொத்த அரிசி</span><h4 class="text-base font-bold text-emerald-800" id="kit-sum-rice">0 kg</h4></div></div>
+                    <div class="bg-sky-50 p-4 rounded-xl border flex items-center justify-between"><div><span class="text-[10px] text-slate-400 font-bold block">மொத்த பருப்பு</span><h4 class="text-base font-bold text-sky-800" id="kit-sum-dal">0 kg</h4></div></div>
+                    <div class="bg-amber-50 p-4 rounded-xl border flex items-center justify-between"><div><span class="text-[10px] text-slate-400 font-bold block">மொத்த காய்கறி</span><h4 class="text-base font-bold text-amber-800" id="kit-sum-veg">0 kg</h4></div></div>
+                    <div class="bg-purple-50 p-4 rounded-xl border flex items-center justify-between"><div><span class="text-[10px] text-slate-400 font-bold block">எண்ணெய்</span><h4 class="text-base font-bold text-purple-800" id="kit-sum-oil">0 Litres</h4></div></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 5: STAFF MANAGEMENT -->
+        <div id="view-staff" class="space-y-4 hidden">
+            <h2 class="font-bold text-base text-slate-700" id="lbl-staff-mgt-title">டெலிவரி ஊழியர்கள் மேலாண்மை</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                <div class="bg-white p-4 rounded-2xl border space-y-3 h-fit">
+                    <h3 class="font-bold text-xs text-emerald-800 uppercase" id="lbl-add-staff-title">புதிய டெலிவரி ஆள் சேர்க்க</h3>
+                    <form id="staff-form" onsubmit="saveStaff(event)" class="space-y-3">
+                        <input type="text" id="staff-name" required placeholder="ஊழியர் பெயர்..." class="w-full p-2 bg-slate-50 border rounded-xl focus:outline-none">
+                        <button type="submit" class="w-full py-2 bg-emerald-600 text-white font-bold rounded-xl shadow">டெலிவரி ஆள் சேமி</button>
+                    </form>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border md:col-span-2 space-y-2">
+                    <h3 class="font-bold text-xs text-slate-400 uppercase">டெலிவரி ஊழியர்கள் பட்டியல்</h3>
+                    <table class="w-full text-left"><thead><tr class="border-b font-bold bg-slate-50 text-slate-500"><th class="p-2">பெயர்</th><th class="p-2 text-center">அழி</th></tr></thead><tbody id="staff-history-table"></tbody></table>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 6: EXPENSES CONSOLE -->
+        <div id="view-expenses" class="space-y-4 hidden">
+            <div class="bg-white p-4 rounded-2xl border shadow-sm space-y-3">
+                <div>
+                    <h3 class="font-bold text-sm text-slate-800"><i class="fa-solid fa-chart-line text-emerald-600"></i> அசல் வரவு செலவு கணக்கு</h3>
+                </div>
+                <div class="border-t pt-2 space-y-1.5">
+                    <span class="text-[10px] text-slate-400 font-bold uppercase block">பார்வை காலத்தை தேர்வு செய்யவும்</span>
+                    <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar py-1" id="accounting-month-tabs"></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                <div class="bg-gradient-to-br from-emerald-50 to-teal-50 border p-4 rounded-2xl space-y-1">
+                    <span class="text-[10px] text-slate-400 block font-bold uppercase">அசல் வருவாய்</span>
+                    <h4 class="text-xl font-bold text-emerald-800" id="acc-lbl-earned">₹0</h4>
+                </div>
+                <div class="bg-gradient-to-br from-rose-50 to-orange-50 border p-4 rounded-2xl space-y-1">
+                    <span class="text-[10px] text-slate-400 block font-bold uppercase">அசல் செலவுகள்</span>
+                    <h4 class="text-xl font-bold text-rose-800" id="acc-lbl-expenses">₹0</h4>
+                </div>
+                <div class="bg-gradient-to-br from-sky-50 to-indigo-50 border p-4 rounded-2xl space-y-1">
+                    <span class="text-[10px] text-slate-400 block font-bold uppercase">அசல் நிகர லாபம்</span>
+                    <h4 class="text-xl font-bold text-sky-800" id="acc-lbl-profit">₹0</h4>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-4 h-fit text-xs">
+                    <h3 class="font-bold text-xs text-rose-800 uppercase tracking-wider" id="lbl-expense-reg">செலவு பதிவு செய்க</h3>
+                    <form id="expense-form" onsubmit="saveExpense(event)" class="space-y-3">
+                        <input type="date" id="exp-date" required class="w-full p-2.5 bg-slate-50 border rounded-xl">
+                        <input type="text" id="exp-item" required placeholder="செலவு விபரம்..." class="w-full p-2.5 bg-slate-50 border rounded-xl focus:outline-none">
+                        <input type="number" id="exp-amount" required placeholder="செலவு ரூபாய்..." class="w-full p-2.5 bg-slate-50 border rounded-xl">
+                        <select id="exp-category" class="w-full p-2.5 bg-slate-50 border rounded-xl">
+                            <option value="Groceries">Groceries / மளிகைப் பொருட்கள்</option>
+                            <option value="Vegetables">Vegetables / காய்கறிகள்</option>
+                            <option value="Petrol">Petrol / டெலிவரி பெட்ரோல்</option>
+                            <option value="Wages">Wages / ஆட்கள் சம்பளம்</option>
+                            <option value="Rent">Rent / இதர செலவுகள்</option>
+                        </select>
+                        <button type="submit" class="w-full py-2.5 bg-rose-600 text-white rounded-xl font-bold shadow-sm" id="btn-save-exp-lbl">செலவைச் சேமி</button>
+                    </form>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm lg:col-span-2 space-y-3">
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <h3 class="font-bold text-xs text-slate-400 uppercase tracking-wider" id="lbl-expense-list">செலவுகள் பட்டியல்</h3>
+                    </div>
+                    <div class="max-h-72 overflow-y-auto">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead><tr class="bg-slate-50 font-bold border-b text-slate-500"><th class="p-2.5" id="lbl-tbl-exp-date">தேதி</th><th class="p-2.5" id="lbl-tbl-exp-item">விபரம்</th><th class="p-2.5" id="lbl-tbl-exp-cat">வகை</th><th class="p-2.5" id="lbl-tbl-exp-amt">தொகை</th><th class="p-2.5 text-center" id="lbl-tbl-exp-del">அழி</th></tr></thead>
+                            <tbody id="expense-history-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Bottom Sticky Mobile Navigation -->
+    <nav class="md:hidden bg-white border-t fixed bottom-0 left-0 right-0 z-40 rounded-t-2xl shadow-xl flex justify-around items-center h-16 max-w-md mx-auto">
+        <button onclick="switchView('customers')" id="m-nav-customers" class="flex flex-col items-center justify-center text-emerald-600 font-bold text-[10px]"><i class="fa-solid fa-user-group text-lg"></i><span id="m-lbl-cust">கஸ்டமர்கள்</span></button>
+        <button onclick="switchView('delivery')" id="m-nav-delivery" class="flex flex-col items-center justify-center text-slate-400 text-[10px]"><i class="fa-solid fa-truck-fast text-lg"></i><span id="m-lbl-deliv">விநியோகம்</span></button>
+        <button onclick="switchView('leave')" id="m-nav-leave" class="flex flex-col items-center justify-center text-slate-400 text-[10px]"><i class="fa-solid fa-calendar-minus text-lg"></i><span id="m-lbl-leaves">லீவ்</span></button>
+        <button onclick="switchView('expenses')" id="m-nav-expenses" class="flex flex-col items-center justify-center text-slate-400 text-[10px]"><i class="fa-solid fa-shield-halved text-lg"></i><span id="m-lbl-accounts">கணக்கு</span></button>
+    </nav>
+
+    <!-- CUSTOMER DIALOG MODAL (WITH COMPANY FIELD) -->
+    <div id="customer-modal" class="fixed inset-0 bg-black/60 hidden items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+        <div class="bg-white rounded-t-3xl sm:rounded-2xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="bg-emerald-600 px-5 py-4 text-white flex justify-between items-center" id="modal-header">
+                <h3 id="modal-title" class="font-bold text-base">வாடிக்கையாளர்</h3>
+                <button type="button" onclick="closeModal()"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="customer-form" onsubmit="saveCustomer(event)" class="p-5 space-y-4 overflow-y-auto pb-12 flex-1 text-xs">
+                <input type="hidden" id="edit-id">
+                
+                <div class="grid grid-cols-2 gap-2">
+                    <div><label class="block font-bold text-slate-400 mb-1">பெயர் *</label><input type="text" id="cust-name" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none"></div>
+                    <div><label class="block font-bold text-slate-400 mb-1">போன் எண் *</label><input type="tel" id="cust-phone" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none"></div>
+                    <!-- NEW FIELD: COMPANY NAME -->
+                    <div class="col-span-2"><label class="block font-bold text-slate-400 mb-1">கம்பெனி பெயர் (Company Name)</label><input type="text" id="cust-company" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none" placeholder="ஏதேனும் இருந்தால் பதிவு செய்யவும்"></div>
+                </div>
+                
+                <div><label class="block font-bold text-slate-400 mb-1">முகவரி</label><textarea id="cust-address" class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none"></textarea></div>
+                <div><label class="block font-bold text-slate-400 mb-1">டெலிவரி ஊழியர் *</label><select id="cust-staff-id" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-700"></select></div>
+                
+                <div class="bg-emerald-50/50 p-3 rounded-2xl border">
+                    <label class="block font-bold text-emerald-800 mb-2">உணவுத் திட்டம் & அளவு</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="flex flex-col items-center justify-between p-2 bg-white rounded-xl border border-slate-200"><label class="text-[10px] font-bold flex flex-col items-center w-full cursor-pointer"><input type="checkbox" id="plan-breakfast" class="mb-1" onchange="toggleQtyInput('breakfast')">Breakfast</label><div id="qty-container-breakfast" class="mt-1 flex items-center bg-slate-50 border rounded px-1 hidden"><input type="number" id="qty-breakfast" min="1" value="1" class="w-8 text-center bg-transparent text-xs font-bold focus:outline-none"></div></div>
+                        <div class="flex flex-col items-center justify-between p-2 bg-white rounded-xl border border-slate-200"><label class="text-[10px] font-bold flex flex-col items-center w-full cursor-pointer"><input type="checkbox" id="plan-lunch" class="mb-1" onchange="toggleQtyInput('lunch')">Lunch</label><div id="qty-container-lunch" class="mt-1 flex items-center bg-slate-50 border rounded px-1 hidden"><input type="number" id="qty-lunch" min="1" value="1" class="w-8 text-center bg-transparent text-xs font-bold focus:outline-none"></div></div>
+                        <div class="flex flex-col items-center justify-between p-2 bg-white rounded-xl border border-slate-200"><label class="text-[10px] font-bold flex flex-col items-center w-full cursor-pointer"><input type="checkbox" id="plan-dinner" class="mb-1" onchange="toggleQtyInput('dinner')">Dinner</label><div id="qty-container-dinner" class="mt-1 flex items-center bg-slate-50 border rounded px-1 hidden"><input type="number" id="qty-dinner" min="1" value="1" class="w-8 text-center bg-transparent text-xs font-bold focus:outline-none"></div></div>
+                    </div>
+                </div>
+                
+                <div class="bg-slate-50 p-3 rounded-xl border space-y-2">
+                    <div class="flex items-center space-x-2"><input type="checkbox" id="cust-istrial" onchange="onTrialToggle()" class="w-4 h-4 text-emerald-600 rounded"><label for="cust-istrial" class="text-xs font-bold text-slate-600">இது 6 நாட்கள் ட்ரையல் காலமா?</label></div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div><label class="block font-bold text-slate-400 mb-1">துவக்க தேதி</label><input type="date" id="cust-start" class="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-xl"></div>
+                        <div><label class="block font-bold text-slate-400 mb-1">முடிவு தேதி</label><div class="flex space-x-1"><input type="date" id="cust-end" class="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-xl"><button type="button" onclick="autoCalculateEndDate()" class="bg-emerald-600 text-white px-2 rounded-xl text-[10px] font-bold"><i class="fa-solid fa-wand-magic-sparkles"></i></button></div></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 bg-amber-50/40 p-3 rounded-2xl border border-amber-100">
+                    <div><label class="block font-bold text-amber-900 mb-1">மொத்த கட்டணம் (₹)</label><input type="number" id="cust-cost" oninput="calculateBalance()" class="w-full px-3 py-1.5 bg-white border rounded-xl focus:outline-none"></div>
+                    <div><label class="block font-bold text-amber-900 mb-1">செலுத்தியது (₹)</label><input type="number" id="cust-paid" oninput="calculateBalance()" class="w-full px-3 py-1.5 bg-white border rounded-xl focus:outline-none"></div>
+                    <div class="col-span-2 flex justify-between items-center pt-2 border-t border-amber-200/50"><span class="text-xs font-bold text-amber-900">நிலுவைத் தொகை:</span><span id="cust-balance" class="text-sm font-bold text-rose-600">₹0</span></div>
+                </div>
+
+                <div><label class="block font-bold text-slate-400 mb-1">குறிப்புகள்</label><input type="text" id="cust-notes" class="w-full px-3.5 py-2 bg-slate-50 border rounded-xl focus:outline-none"></div>
+                
+                <div class="flex space-x-3 pt-2">
+                    <button type="button" onclick="closeModal()" class="flex-1 py-2.5 bg-slate-100 text-slate-600 rounded-xl font-bold transition">Cancel</button>
+                    <!-- சேவ் பட்டன் -->
+                    <button type="submit" id="btn-save-customer" class="flex-1 py-2.5 bg-emerald-600 text-white rounded-xl font-bold transition shadow-md">சேமி / Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modals (Confirm) -->
+    <div id="confirm-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl w-full max-w-xs shadow-2xl p-5 text-center text-xs">
+            <h3 class="font-bold text-sm text-slate-800">உறுதியாகவா?</h3>
+            <p class="text-xs text-slate-500 mt-1.5">இந்த விபரம் முற்றிலும் நீக்கப்படும்.</p>
+            <div class="flex space-x-2.5 mt-4">
+                <button onclick="closeConfirmModal()" class="flex-1 py-2 bg-slate-100 rounded-xl text-xs font-bold text-slate-600">Cancel</button>
+                <button id="confirm-yes-btn" class="flex-1 py-2 bg-rose-600 text-white rounded-xl text-xs font-bold shadow-sm">நீக்கு</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed bottom-20 left-1/2 -translate-x-1/2 bg-slate-900/95 text-white text-xs px-4 py-3 rounded-full shadow-xl transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center space-x-2 whitespace-nowrap">
+        <span id="toast-icon"></span><span id="toast-message" class="font-medium"></span>
+    </div>
+
+    <!-- MAIN JAVASCRIPT -->
+    <script>
+        // 🌟 1. FIREBASE INITIALIZATION
+        const firebaseConfig = {
+            apiKey: "AIzaSyARpCS-8eL3dJWfTSQUXEKpIFBFTQxd98I",
+            authDomain: "healthy-homes-foods.firebaseapp.com",
+            projectId: "healthy-homes-foods",
+            storageBucket: "healthy-homes-foods.appspot.com",
+            messagingSenderId: "249934751042",
+            appId: "1:249934751042:web:2421749b76a4ade681d4db"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // 🌟 KEY INITIALIZATION
+        const KEY_CUST = 'hh_cust_enterprise_v8';
+        const KEY_LEAVES = 'hh_leaves_enterprise_v8';
+        const KEY_MENU = 'hh_menu_enterprise_v8';
+        const KEY_EXP = 'hh_exp_enterprise_v8';
+        const KEY_STAFF = 'hh_staff_enterprise_v8';
+
+        window.customers = JSON.parse(localStorage.getItem(KEY_CUST) || '[]');
+        window.leaves = JSON.parse(localStorage.getItem(KEY_LEAVES) || '[]');
+        window.menuPlan = JSON.parse(localStorage.getItem(KEY_MENU) || '[]');
+        window.expenses = JSON.parse(localStorage.getItem(KEY_EXP) || '[]');
+        window.staffList = JSON.parse(localStorage.getItem(KEY_STAFF) || '[]');
+
+        window.todayDateStr = "2026-07-08"; 
+        window.deliveryStatus = JSON.parse(localStorage.getItem('hh_deliveries_v8_' + window.todayDateStr)) || {};
+        window.activeView = 'customers'; window.activeFilter = 'all'; 
+        window.selectedAccountingPeriod = 'cumulative';
+
+        function saveAllToStorage() {
+            localStorage.setItem(KEY_CUST, JSON.stringify(window.customers));
+            localStorage.setItem(KEY_LEAVES, JSON.stringify(window.leaves));
+            localStorage.setItem(KEY_MENU, JSON.stringify(window.menuPlan));
+            localStorage.setItem(KEY_EXP, JSON.stringify(window.expenses));
+            localStorage.setItem(KEY_STAFF, JSON.stringify(window.staffList));
+            localStorage.setItem('hh_deliveries_v8_' + window.todayDateStr, JSON.stringify(window.deliveryStatus));
+        }
+
+        window.onload = function() {
+            renderAll();
+            renderAccountsMonthTabs();
+            toggleAccountingCycle('cumulative');
+        }
+
+        // 🌟 GOOGLE SHEET URL
+        const GOOGLE_SHEET_URL = "https://script.google.com/macros/s/AKfycbykxBQj5Jy67TcfeWZJLI9avtMZx9HbS2vsgLVfB6l-mfZfpPvUBLBTE2ZzPJd_c6sylQ/exec";
+
+        function syncToGoogleSheet(customerData) {
+            if(!GOOGLE_SHEET_URL) return;
+            fetch(GOOGLE_SHEET_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(customerData) })
+                .catch(e => console.error("Sheet Sync Error: ", e));
+        }
+
+        window.exportAllToSheet = async function() {
+            if (window.customers.length === 0) { showToast("தரவுகள் எதுவும் இல்லை!", "alert"); return; }
+            if(!confirm("அனைத்து " + window.customers.length + " கஸ்டமர் தரவுகளையும் கூகுள் ஷீட்டிற்கு அனுப்பவா?")) return;
+            
+            const btn = document.querySelector('button[onclick="exportAllToSheet()"]');
+            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Syncing...'; }
+
+            showToast("தரவுகள் ஷீட்டிற்கு அனுப்பப்படுகிறது...", "alert");
+            for (let i = 0; i < window.customers.length; i++) {
+                try {
+                    await fetch(GOOGLE_SHEET_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "application/json" }, body: JSON.stringify(window.customers[i]) });
+                    await new Promise(r => setTimeout(r, 600)); 
+                } catch(e) { console.error("Error at index " + i, e); }
+            }
+            showToast("முழுமையாக ஷீட்டிற்கு அனுப்பப்பட்டது!");
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fa-brands fa-google-drive mr-1"></i> Sync All to Sheet'; }
+        }
+
+        // 🌟 CUSTOMER சேமிப்பு & FIREBASE BACKUP
+        window.saveCustomer = function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('btn-save-customer');
+            if (submitBtn) { submitBtn.disabled = true; submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> சேமிக்கப்படுகிறது...'; }
+
+            const idInput = document.getElementById('edit-id').value;
+            const nameInput = document.getElementById('cust-name').value.trim();
+            const phoneInput = document.getElementById('cust-phone').value.trim();
+
+            if (!idInput) {
+                const isDuplicate = window.customers.some(c => c.phone === phoneInput || c.name.toLowerCase() === nameInput.toLowerCase());
+                if (isDuplicate) {
+                    showToast("இந்த வாடிக்கையாளர் (பெயர் அல்லது போன்) ஏற்கனவே பட்டியலில் உள்ளார்!", "alert");
+                    if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = 'சேமி / Save'; }
+                    return;
+                }
+            }
+
+            const id = idInput || "cust_" + Date.now();
+            const obj = {
+                id, name: nameInput, companyName: document.getElementById('cust-company').value.trim(), phone: phoneInput, address: document.getElementById('cust-address').value, paymentTerm: "monthly",
+                breakfast: document.getElementById('plan-breakfast').checked, breakfastQty: parseInt(document.getElementById('qty-breakfast').value)||1,
+                lunch: document.getElementById('plan-lunch').checked, lunchQty: parseInt(document.getElementById('qty-lunch').value)||1,
+                dinner: document.getElementById('plan-dinner').checked, dinnerQty: parseInt(document.getElementById('qty-dinner').value)||1,
+                start: document.getElementById('cust-start').value, end: document.getElementById('cust-end').value, isTrial: document.getElementById('cust-istrial').checked,
+                cost: parseFloat(document.getElementById('cust-cost').value)||0, paid: parseFloat(document.getElementById('cust-paid').value)||0, notes: document.getElementById('cust-notes').value, staffId: document.getElementById('cust-staff-id').value || ""
+            };
+            
+            const idx = window.customers.findIndex(c => c.id === id); 
+            if(idx !== -1) window.customers[idx] = obj; 
+            else window.customers.push(obj);
+            
+            saveAllToStorage(); 
+            syncToGoogleSheet(obj); 
+
+            db.collection("customers").doc(id).set(obj)
+                .then(() => console.log("Firebase-ல் சேமிக்கப்பட்டது!"))
+                .catch((error) => console.error("Firebase Error: ", error));
+
+            closeModal(); renderAll(); showToast("விபரம் சேமிக்கப்பட்டது!");
+            if (submitBtn) { submitBtn.disabled = false; submitBtn.innerHTML = 'சேமி / Save'; }
+        }
+
+        // 🌟 GENERATE MEMO BILL (WITH GPAY & COMPANY NAME)
+        window.printMemoBill = function(id) {
+            const c = window.customers.find(item => item.id === id);
+            if (!c) return;
+
+            const matchLeaves = window.leaves.filter(l => l.custId === id);
+            const totalLeaveDays = matchLeaves.reduce((acc, l) => {
+                const dMatch = l.date.match(/\((\d+)\s+days\)/);
+                return acc + (dMatch ? parseInt(dMatch[1]) : 1);
+            }, 0);
+
+            const basePlanCost = c.cost || 0;
+            const deductionPerDay = c.isTrial ? 200 : 220;
+            const totalDeductions = totalLeaveDays * deductionPerDay;
+            const subtotalDue = Math.max(0, basePlanCost - totalDeductions);
+            const balanceDue = Math.max(0, subtotalDue - c.paid);
+
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Memo Bill - ${c.name}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; color: #333; max-width: 800px; margin: 0 auto; }
+                        .header { text-align: center; border-bottom: 2px solid #059669; padding-bottom: 10px; margin-bottom: 20px; }
+                        .header h1 { color: #059669; margin: 0; font-size: 28px; }
+                        .header p { margin: 5px 0; color: #555; }
+                        .details { margin-bottom: 20px; width: 100%; }
+                        .details th { text-align: left; padding-right: 15px; width: 30%; }
+                        .bill-table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                        .bill-table th, .bill-table td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+                        .bill-table th { background-color: #f8f9fa; }
+                        .total-row { font-weight: bold; background-color: #ecfdf5; }
+                        .payment-info { border: 2px dashed #059669; padding: 15px; border-radius: 8px; text-align: center; background-color: #f0fdf4; margin-top: 20px; }
+                        .payment-info h3 { margin-top: 0; color: #059669; }
+                        .footer { text-align: center; margin-top: 40px; font-size: 14px; color: #777; border-top: 1px solid #eee; padding-top: 10px; }
+                    </style>
+                </head>
+                <body onload="window.print(); window.close();">
+                    <div class="header">
+                        <h1>HEALTHY HOME'S FOODS</h1>
+                        <p>கோவை (Coimbatore)</p>
+                        <h2 style="color: #333;">INVOICE / MEMO BILL</h2>
+                    </div>
+                    
+                    <table class="details">
+                        <tr><th>Customer Name:</th><td><b>${c.name}</b></td></tr>
+                        ${c.companyName ? `<tr><th>Company Name:</th><td>${c.companyName}</td></tr>` : ''}
+                        <tr><th>Address:</th><td>${c.address || '-'}</td></tr>
+                        <tr><th>Phone:</th><td>${c.phone}</td></tr>
+                        <tr><th>Date:</th><td>${new Date().toLocaleDateString('en-IN')}</td></tr>
+                        ${c.start && c.end ? `<tr><th>Billing Cycle:</th><td>${c.start} to ${c.end}</td></tr>` : ''}
+                    </table>
+
+                    <table class="bill-table">
+                        <tr>
+                            <th>Description</th>
+                            <th style="text-align: right;">Amount (₹)</th>
+                        </tr>
+                        <tr>
+                            <td>Subscription Cost (Base Plan)</td>
+                            <td style="text-align: right;">${basePlanCost}</td>
+                        </tr>
+                        <tr>
+                            <td>Leaves Deducted (${totalLeaveDays} days)</td>
+                            <td style="text-align: right; color: #e11d48;">- ${totalDeductions}</td>
+                        </tr>
+                        <tr class="total-row">
+                            <td>Subtotal</td>
+                            <td style="text-align: right;">${subtotalDue}</td>
+                        </tr>
+                        <tr>
+                            <td>Amount Paid</td>
+                            <td style="text-align: right; color: #059669;">${c.paid || 0}</td>
+                        </tr>
+                        <tr class="total-row" style="font-size: 18px;">
+                            <td>Net Balance Due</td>
+                            <td style="text-align: right; color: #e11d48;">${balanceDue}</td>
+                        </tr>
+                    </table>
+
+                    <div class="payment-info">
+                        <h3>Payment Details</h3>
+                        <p style="font-size: 18px; margin: 10px 0;"><strong>GPay Number:</strong> 7868888625</p>
+                        <p style="font-size: 16px; margin: 0;"><strong>Name:</strong> Rajarajeshwari</p>
+                    </div>
+
+                    <div class="footer">
+                        <p>Thank you for choosing Healthy Home's Foods!</p>
+                    </div>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+
+        window.saveExpense = function(e) { e.preventDefault(); const btn = e.target.querySelector('button[type="submit"]'); if(btn) { btn.disabled = true; btn.innerText = "Loading..."; } const expObj = { id: "exp_" + Date.now(), date: document.getElementById('exp-date').value, item: document.getElementById('exp-item').value, amount: parseFloat(document.getElementById('exp-amount').value) || 0, category: document.getElementById('exp-category').value }; window.expenses.push(expObj); saveAllToStorage(); db.collection("expenses").doc(expObj.id).set(expObj); document.getElementById('expense-form').reset(); renderAll(); showToast("செலவு கணக்கு சேர்க்கப்பட்டது!"); if(btn) { btn.disabled = false; btn.innerText = "செலவைச் சேமி"; } }
+        window.saveLeave = function(e) { e.preventDefault(); const btn = e.target.querySelector('button[type="submit"]'); if(btn) { btn.disabled = true; btn.innerText = "Loading..."; } const custId = document.getElementById('leave-cust-id').value; const targetCustomer = window.customers.find(item => item.id === custId); const date = document.getElementById('leave-date').value; const extendDate = calculateContinuousLeaveExtension(); if(!targetCustomer || !extendDate) { showToast("தவறான லீவ் கணக்கீடு!", "alert"); if(btn) { btn.disabled = false; btn.innerText = "லீவ் சேமி"; } return; } const leaveObj = { id: "leave_" + Date.now(), custId, custName: targetCustomer.name, date: date + ` (${document.getElementById('leave-days-count').value} days)`, extendDate }; window.leaves.push(leaveObj); targetCustomer.end = extendDate; saveAllToStorage(); db.collection("leaves").doc(leaveObj.id).set(leaveObj); db.collection("customers").doc(custId).set(targetCustomer); document.getElementById('leave-form').reset(); document.getElementById('leave-days-count').value = 1; renderAll(); showToast("தொடர் விடுப்பு பதிவு செய்யப்பட்டது!"); if(btn) { btn.disabled = false; btn.innerText = "லீவ் சேமி"; } }
+        window.saveStaff = function(e) { e.preventDefault(); const btn = e.target.querySelector('button[type="submit"]'); if(btn) { btn.disabled = true; btn.innerText = "Loading..."; } const staffObj = { id: "st_" + Date.now(), name: document.getElementById('staff-name').value }; window.staffList.push(staffObj); saveAllToStorage(); db.collection("staffs").doc(staffObj.id).set(staffObj); document.getElementById('staff-form').reset(); renderAll(); showToast("புதிய டெலிவரி ஆள் சேர்க்கப்பட்டார்!"); if(btn) { btn.disabled = false; btn.innerText = "டெலிவரி ஆள் சேமி"; } }
+
+        let activeDeleteId = null; let activeDeleteType = '';
+        window.triggerDeleteConfirm = function(id, type) { activeDeleteId = id; activeDeleteType = type; document.getElementById('confirm-modal').style.display = 'flex'; }
+        window.closeConfirmModal = function() { document.getElementById('confirm-modal').style.display = 'none'; }
+        
+        document.getElementById('confirm-yes-btn').onclick = function() {
+            if(activeDeleteType==='customer') { window.customers = window.customers.filter(c=>c.id!==activeDeleteId); db.collection("customers").doc(activeDeleteId).delete(); }
+            if(activeDeleteType==='leave') { window.leaves = window.leaves.filter(l=>l.id!==activeDeleteId); db.collection("leaves").doc(activeDeleteId).delete(); }
+            if(activeDeleteType==='expense') { window.expenses = window.expenses.filter(ex=>ex.id!==activeDeleteId); db.collection("expenses").doc(activeDeleteId).delete(); }
+            if(activeDeleteType==='staff') { window.staffList = window.staffList.filter(st=>st.id!==activeDeleteId); db.collection("staffs").doc(activeDeleteId).delete(); }
+            saveAllToStorage(); closeConfirmModal(); renderAll(); showToast("பதிவு நீக்கப்பட்டது!");
+        }
+
+        window.applyFilter = function(filter) { window.activeFilter = filter; ['all', 'trial', 'unpaid'].forEach(b => { const el = document.getElementById('btn-' + b); if(el) { if(b === filter) { el.classList.add('active-filter-green'); el.classList.remove('text-slate-500', 'bg-white'); } else { el.classList.remove('active-filter-green'); el.classList.add('text-slate-500', 'bg-white'); } } }); renderCustomerCards(); }
+        window.filterCustomers = function() { renderCustomerCards(); }
+        function renderSummary() { const custCount = window.customers ? window.customers.length : 0; document.getElementById('stat-total-cust').innerText = custCount; document.getElementById('badge-cust-count').innerText = `${custCount} கஸ்டமர்கள்`; let b = 0, l = 0, d = 0, earned = 0; if (window.customers) { window.customers.forEach(c => { if (c.breakfast) b += (parseInt(c.breakfastQty) || 1); if (c.lunch) l += (parseInt(c.lunchQty) || 1); if (c.dinner) d += (parseInt(c.dinnerQty) || 1); earned += (parseFloat(c.paid) || 0); }); } document.getElementById('stat-today-deliveries').innerText = `B:${b} | L:${l} | D:${d}`; document.getElementById('stat-total-earnings').innerText = `₹${earned.toLocaleString('en-IN')}`; let spent = 0; if (window.expenses) { window.expenses.forEach(e => spent += (parseFloat(e.amount) || 0)); } document.getElementById('stat-total-expenses').innerText = `₹${spent.toLocaleString('en-IN')}`; }
+        
+        function renderCustomerCards() { 
+            const container = document.getElementById('customer-cards-list'); if(!container) return; container.innerHTML = ''; const q = document.getElementById('search-bar').value.toLowerCase(); const today = new Date(); today.setHours(0,0,0,0); 
+            let list = window.customers.filter(c => { const matchSearch = c.name.toLowerCase().includes(q) || c.phone.includes(q) || (c.address && c.address.toLowerCase().includes(q)); if (!matchSearch) return false; if (window.activeFilter === 'trial') return c.isTrial; if (window.activeFilter === 'unpaid') return (c.cost - c.paid) > 0; return true; }); 
+            list.forEach(c => { 
+                const balance = Math.max(0, c.cost - c.paid); const endDate = c.end ? new Date(c.end) : null; let daysRemaining = endDate ? Math.ceil((endDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24)) : 0; const isOverdue = endDate && (today > endDate) && (balance > 0); const card = document.createElement('div'); card.className = `bg-white rounded-2xl border ${isOverdue ? 'border-rose-400 bg-rose-50/10' : 'border-slate-200'} p-4 space-y-3 shadow-sm flex flex-col justify-between hover:shadow transition-shadow`; const statusBadge = isOverdue ? `<span class="text-[9px] bg-rose-600 text-white px-2.5 py-0.5 rounded-full font-bold uppercase animate-pulse">OVERDUE</span>` : `<span class="text-[9px] ${c.isTrial ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'} px-2.5 py-0.5 rounded-full font-bold uppercase">${c.isTrial ? '6 Days Trial' : 'Monthly Plan'}</span>`; 
+                card.innerHTML = ` <div class="space-y-2"> <div class="flex justify-between items-start"> <div><h4 class="font-bold text-sm text-slate-800 leading-tight">${c.name}</h4><span class="text-[10px] text-slate-400 block"><i class="fa-solid fa-phone"></i> ${c.phone}</span></div> ${statusBadge} </div> <div class="flex flex-wrap gap-1"> ${c.breakfast ? `<span class="text-[9px] bg-emerald-50 text-emerald-700 font-bold px-2 py-0.5 rounded-full border border-emerald-100">B (${c.breakfastQty || 1})</span>` : ''} ${c.lunch ? `<span class="text-[9px] bg-sky-50 text-sky-700 font-bold px-2 py-0.5 rounded-full border border-sky-100">L (${c.lunchQty || 1})</span>` : ''} ${c.dinner ? `<span class="text-[9px] bg-purple-50 text-purple-700 font-bold px-2 py-0.5 rounded-full border border-purple-100">D (${c.dinnerQty || 1})</span>` : ''} </div> <div class="text-[11px] text-slate-500 bg-slate-50 p-2 rounded-xl border leading-snug">${c.address || 'முகவரி இல்லை'}</div> <div class="bg-slate-50 border p-2.5 rounded-xl grid grid-cols-2 gap-2 text-[11px]"> <div><span class="text-slate-400 text-[9px] font-bold block">மீதமுள்ள நாட்கள்:</span><span class="font-bold">${daysRemaining > 0 ? daysRemaining + ' நாட்கள்' : 'முடிவடைந்தது'}</span></div> <div><span class="text-slate-400 text-[9px] font-bold block">நிலுவைத் தொகை:</span><span class="font-bold text-rose-600">₹${balance}</span></div> <div class="col-span-2 border-t pt-1 text-[10px] text-slate-500 flex justify-between items-center"> <span>முடிவுத் தேதி: <b>${c.end || '-'}</b></span> ${balance > 0 ? `<button onclick="window.open('https://api.whatsapp.com/send?phone=91${c.phone}&text=வணக்கம் ${c.name}, உங்களின் நிலுவைத் தொகை ₹${balance} ஆகும். நன்றி!', '_blank')" class="bg-emerald-600 text-white px-2 py-0.5 rounded text-[9px] font-bold"><i class="fa-brands fa-whatsapp animate-pulse"></i> <span>வாட்ஸ்அப் டியூ</span></button>` : ''} </div> </div> </div> 
+                <div class="grid grid-cols-4 gap-1.5 pt-2 border-t text-center"> 
+                    <button onclick="openEditModal('${c.id}')" class="py-1.5 bg-slate-100 rounded-xl text-[10px] font-bold text-slate-600 flex items-center justify-center space-x-1"><i class="fa-solid fa-pen"></i> <span>திருத்து</span></button> 
+                    <button onclick="printMemoBill('${c.id}')" class="py-1.5 bg-indigo-50 text-indigo-700 rounded-xl text-[10px] font-bold flex items-center justify-center space-x-1"><i class="fa-solid fa-print"></i> <span>Memo Bill</span></button>
+                    <button onclick="downloadCustomerLedger('${c.id}')" class="py-1.5 bg-sky-50 text-sky-700 rounded-xl text-[10px] font-bold flex items-center justify-center space-x-1"><i class="fa-solid fa-file-invoice"></i> <span>லெட்ஜர்</span></button> 
+                    <button onclick="triggerDeleteConfirm('${c.id}', 'customer')" class="py-1.5 bg-rose-50 text-rose-600 rounded-xl text-[10px] font-bold flex items-center justify-center space-x-1"><i class="fa-solid fa-trash"></i> <span>நீக்கு</span></button> 
+                </div> `; 
+                container.appendChild(card); 
+            }); 
+        }
+        
+        function renderLeaveView() { const tbody = document.getElementById('leave-history-table'); if(!tbody) return; tbody.innerHTML = ''; if (window.leaves.length === 0) { tbody.innerHTML = `<tr><td colspan="5" class="p-3 text-center text-slate-400">லீவ் பதிவுகள் எதுவும் இல்லை.</td></tr>`; return; } window.leaves.forEach(l => { tbody.innerHTML += `<tr class="border-b hover:bg-slate-50/50"><td class="p-2.5 font-semibold text-slate-700">${l.custName}</td><td class="p-2.5 text-slate-500">${l.date}</td><td class="p-2.5 font-bold text-emerald-600">${l.extendDate}</td><td class="p-2.5 text-center"><button onclick="triggerDeleteConfirm('${l.id}', 'leave')" class="text-rose-500 hover:text-rose-700"><i class="fa-solid fa-trash"></i></button></td></tr>`; }); }
+        function renderStaffView() { const tbody = document.getElementById('staff-history-table'); if(!tbody) return; tbody.innerHTML = ''; if (window.staffList.length === 0) { tbody.innerHTML = `<tr><td class="p-3 text-center text-slate-400">ஊழியர்கள் யாரும் இல்லை.</td></tr>`; return; } window.staffList.forEach(st => { tbody.innerHTML += `<tr class="border-b hover:bg-slate-50/50"><td class="p-2.5 font-semibold text-slate-700">${st.name}</td><td class="p-2.5 text-center"><button onclick="triggerDeleteConfirm('${st.id}', 'staff')" class="text-rose-500 hover:text-rose-700"><i class="fa-solid fa-trash"></i></button></td></tr>`; }); }
+        
+        window.switchView = function(viewId) { window.activeView = viewId; ['customers', 'delivery', 'leave', 'kitchen', 'staff', 'expenses'].forEach(v => { const el = document.getElementById('view-' + v); if(el) el.classList.add('hidden'); }); const activeEl = document.getElementById('view-' + viewId); if(activeEl) activeEl.classList.remove('hidden'); const tabs = ['customers', 'delivery', 'leave', 'kitchen', 'staff', 'expenses']; tabs.forEach(t => { const mEl = document.getElementById('m-nav-' + (t==='kitchen'?'leave':t)); const dEl = document.getElementById('d-tab-' + t); if (t === viewId) { if (mEl) { mEl.classList.add('text-emerald-600', 'font-bold'); mEl.classList.remove('text-slate-400'); } if (dEl) dEl.className = "flex-1 py-2.5 text-center text-xs font-bold rounded-lg bg-emerald-600 text-white"; } else { if (dEl) dEl.className = "flex-1 py-2.5 text-center text-xs font-bold rounded-lg text-slate-500 hover:bg-slate-50"; } }); renderAll(); }
+        window.openAddModal = function() { document.getElementById('modal-title').innerText = "புதிய வாடிக்கையாளர்"; document.getElementById('customer-form').reset(); document.getElementById('edit-id').value = ''; document.getElementById('cust-balance').innerText = '₹0'; toggleQtyInput('breakfast'); toggleQtyInput('lunch'); toggleQtyInput('dinner'); document.getElementById('customer-modal').style.display = 'flex'; }
+        window.openEditModal = function(id) { const c = window.customers.find(item => item.id === id); if(!c) return; document.getElementById('modal-title').innerText = "வாடிக்கையாளர் விவரம் திருத்து"; document.getElementById('edit-id').value = c.id; document.getElementById('cust-name').value = c.name; document.getElementById('cust-company').value = c.companyName || ''; document.getElementById('cust-phone').value = c.phone; document.getElementById('cust-address').value = c.address || ''; document.getElementById('plan-breakfast').checked = c.breakfast || false; document.getElementById('qty-breakfast').value = c.breakfastQty || 1; toggleQtyInput('breakfast'); document.getElementById('plan-lunch').checked = c.lunch || false; document.getElementById('qty-lunch').value = c.lunchQty || 1; toggleQtyInput('lunch'); document.getElementById('plan-dinner').checked = c.dinner || false; document.getElementById('qty-dinner').value = c.dinnerQty || 1; toggleQtyInput('dinner'); document.getElementById('cust-start').value = c.start || ''; document.getElementById('cust-end').value = c.end || ''; document.getElementById('cust-istrial').checked = c.isTrial; document.getElementById('cust-cost').value = c.cost || 0; document.getElementById('cust-paid').value = c.paid || 0; document.getElementById('cust-notes').value = c.notes || ''; document.getElementById('cust-staff-id').value = c.staffId || ''; calculateBalance(); document.getElementById('customer-modal').style.display = 'flex'; }
+        window.closeModal = function() { document.getElementById('customer-modal').style.display = 'none'; }
+        window.calculateBalance = function() { document.getElementById('cust-balance').innerText = '₹' + Math.max(0, (parseFloat(document.getElementById('cust-cost').value)||0) - (parseFloat(document.getElementById('cust-paid').value)||0)); }
+        window.toggleQtyInput = function(meal) { const isChecked = document.getElementById('plan-' + meal).checked; const container = document.getElementById('qty-container-' + meal); if (container) container.classList.toggle('hidden', !isChecked); }
+        window.onPaymentTermChanged = function() { const isTrial = document.getElementById('cust-istrial').checked; if(isTrial) { document.getElementById('cust-cost').value = 1200; document.getElementById('cust-paid').value = 1200; } else { document.getElementById('cust-cost').value = 5800; document.getElementById('cust-paid').value = 5800; } calculateBalance(); }
+        window.onTrialToggle = function() { window.onPaymentTermChanged(); }
+        window.autoCalculateEndDate = function() { const startDateStr = document.getElementById('cust-start').value; if(!startDateStr) { showToast("துவக்க தேதியை தேர்வு செய்க!", "alert"); return; } let current = new Date(startDateStr); let added = (current.getDay() !== 0) ? 1 : 0; const daysToDeliver = document.getElementById('cust-istrial').checked ? 6 : 26; while(added < daysToDeliver) { current.setDate(current.getDate() + 1); if (current.getDay() !== 0) added++; } document.getElementById('cust-end').value = current.toISOString().slice(0, 10); showToast(`முடிவுத் தேதி ${daysToDeliver} நாட்களுக்குக் கணக்கிடப்பட்டது.`); }
+        window.calculateContinuousLeaveExtension = function() { const custId = document.getElementById('leave-cust-id').value; const leaveDateStr = document.getElementById('leave-date').value; const leaveDays = parseInt(document.getElementById('leave-days-count').value) || 1; const previewEl = document.getElementById('leave-extended-preview'); if(!custId || !leaveDateStr || !leaveDays) { if(previewEl) previewEl.innerText = "-"; return; } const customer = window.customers.find(c => c.id === custId); if(!customer || !customer.end) return; let currentEndDate = new Date(customer.end); let leaveStart = new Date(leaveDateStr); let missedWorkingDays = 0; for(let i=0; i < leaveDays; i++) { let checkDay = new Date(leaveStart); checkDay.setDate(leaveStart.getDate() + i); if(checkDay.getDay() !== 0) missedWorkingDays++; } let daysAdded = 0; while(daysAdded < missedWorkingDays) { currentEndDate.setDate(currentEndDate.getDate() + 1); if(currentEndDate.getDay() !== 0) daysAdded++; } const formattedNewEnd = currentEndDate.toISOString().slice(0, 10); if(previewEl) previewEl.innerText = formattedNewEnd; return formattedNewEnd; }
+        
+        function updateLeaveDropdown() { const s = document.getElementById('leave-cust-id'); if(s) { s.innerHTML = '<option value="">தேர்வு செய்க...</option>'; window.customers.forEach(c => s.innerHTML += `<option value="${c.id}">${c.name}</option>`); } }
+        function updateStaffDropdowns() { const s1 = document.getElementById('cust-staff-id'); const s2 = document.getElementById('route-staff-filter'); if(s1) { s1.innerHTML = '<option value="">தேர்வு செய்க...</option>'; window.staffList.forEach(s => s1.innerHTML += `<option value="${s.id}">${s.name}</option>`); } if(s2) { s2.innerHTML = '<option value="all">அனைத்து ஊழியர்கள்</option>'; window.staffList.forEach(s => s2.innerHTML += `<option value="${s.id}">${s.name}</option>`); } }
+        function showToast(msg, type='success') { const t = document.getElementById('toast'); if(t) { document.getElementById('toast-message').innerText = msg; t.classList.remove('translate-y-20', 'opacity-0'); setTimeout(() => t.classList.add('translate-y-20', 'opacity-0'), 1500); } }
+        
+        function renderAll() { renderSummary(); renderCustomerCards(); renderLeaveView(); renderStaffView(); updateStaffDropdowns(); updateLeaveDropdown(); }
+    </script>
+</body>
+</html>

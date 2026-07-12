@@ -1,0 +1,9 @@
+# Ignore IDE & Editor configuration files
+.vscode/
+.idea/
+.gemini/
+.agents/
+.git/
+
+# Ignore log files
+*.log

@@ -1,0 +1,257 @@
+/* 🌟 PREMIUM OBSIDIAN DARK MODE & EXCEL GRID STYLE SYSTEM */
+
+/* 1. Global Reset & Body Theme Override */
+body {
+    font-family: 'Poppins', 'Mukta Malar', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    background-color: #0b0f19 !important;
+    color: #e2e8f0 !important;
+    font-size: 14px; /* Easily readable medium-sized text */
+}
+
+/* 2. Global Dark Color Palette Overrides for Tailwind classes */
+.bg-white {
+    background-color: #151c2c !important; /* Deep charcoal navy card */
+    color: #f1f5f9 !important;
+}
+
+.bg-slate-50 {
+    background-color: #0d121f !important; /* Body background fallback */
+}
+
+.bg-slate-100 {
+    background-color: #1b2438 !important; /* Light accent block */
+}
+
+/* Custom background color overrides for badges and widget containers */
+.bg-emerald-50, .bg-emerald-50\/50, .bg-emerald-50\/40 {
+    background-color: #064e3b !important;
+    color: #a7f3d0 !important;
+}
+
+.bg-blue-50, .bg-blue-50\/50, .bg-blue-50\/40 {
+    background-color: #1e3a8a !important;
+    color: #bfdbfe !important;
+}
+
+.bg-rose-50, .bg-rose-50\/50, .bg-rose-50\/40 {
+    background-color: #881337 !important;
+    color: #fecdd3 !important;
+}
+
+.bg-purple-50, .bg-purple-50\/50, .bg-purple-50\/40 {
+    background-color: #581c87 !important;
+    color: #e9d5ff !important;
+}
+
+.bg-sky-50, .bg-sky-50\/50, .bg-sky-50\/40 {
+    background-color: #0c4a6e !important;
+    color: #bae6fd !important;
+}
+
+.bg-amber-50, .bg-amber-50\/50, .bg-amber-50\/40 {
+    background-color: #78350f !important;
+    color: #fde68a !important;
+}
+
+/* Custom text color overrides */
+.text-emerald-600, .text-emerald-700, .text-emerald-800 {
+    color: #34d399 !important;
+}
+.text-rose-600, .text-rose-700, .text-rose-800 {
+    color: #fb7185 !important;
+}
+.text-amber-600, .text-amber-700, .text-amber-800 {
+    color: #fbbf24 !important;
+}
+.text-sky-600, .text-sky-700, .text-sky-800 {
+    color: #38bdf8 !important;
+}
+.text-indigo-600, .text-indigo-700, .text-indigo-800 {
+    color: #818cf8 !important;
+}
+
+.text-slate-800 {
+    color: #f1f5f9 !important;
+}
+
+.text-slate-700 {
+    color: #cbd5e1 !important;
+}
+
+.text-slate-600 {
+    color: #94a3b8 !important;
+}
+
+.text-slate-500 {
+    color: #64748b !important;
+}
+
+.text-slate-400 {
+    color: #64748b !important;
+}
+
+/* Borders */
+.border,
+.border-slate-100,
+.border-slate-200,
+.border-slate-300 {
+    border-color: #1e293b !important;
+}
+
+/* Inputs & Form Elements */
+input[type="text"],
+input[type="number"],
+input[type="tel"],
+input[type="date"],
+input[type="password"],
+select,
+textarea {
+    background-color: #0b0f19 !important;
+    color: #f1f5f9 !important;
+    border-color: #334155 !important;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="tel"]:focus,
+input[type="date"]:focus,
+input[type="password"]:focus,
+select:focus,
+textarea:focus {
+    border-color: #10b981 !important; /* Emerald green focus */
+    outline: none;
+    box-shadow: 0 0 0 1px #10b981;
+}
+
+/* Navigation & Button overrides */
+.active-filter-green {
+    background-color: #059669 !important;
+    color: white !important;
+    border-color: #059669 !important;
+}
+
+/* Custom Scrollbars */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}
+
+.scroll-container::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+.scroll-container::-webkit-scrollbar-track {
+    background: #0f172a;
+    border-radius: 10px;
+}
+.scroll-container::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 10px;
+}
+.scroll-container::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+}
+
+/* 3. Excel master editor styles */
+.excel-container {
+    background-color: #0b0f19;
+    border: 1px solid #1e293b;
+    border-radius: 12px;
+    overflow-x: auto;
+}
+
+.excel-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+    color: #f1f5f9;
+}
+
+.excel-table th {
+    background-color: #1e293b;
+    color: #94a3b8;
+    font-weight: 600;
+    text-align: left;
+    padding: 8px 12px;
+    border: 1px solid #334155;
+    user-select: none;
+    font-size: 12px;
+}
+
+.excel-table td {
+    padding: 2px 4px; /* Tight padding to look like excel cells */
+    border: 1px solid #1e293b;
+    vertical-align: middle;
+}
+
+.excel-row:nth-child(even) {
+    background-color: #111827;
+}
+
+.excel-row:hover {
+    background-color: #1b2438;
+}
+
+/* Excel Input Field cell styling */
+.excel-cell-input {
+    width: 100%;
+    height: 32px;
+    background: transparent !important;
+    border: none !important;
+    padding: 4px 8px;
+    color: #f1f5f9 !important;
+    font-size: 13px;
+    border-radius: 0 !important;
+}
+
+.excel-cell-input:focus {
+    background-color: #090d16 !important;
+    outline: 2px solid #10b981 !important;
+    outline-offset: -2px;
+    box-shadow: none !important;
+}
+
+.excel-cell-select {
+    width: 100%;
+    height: 32px;
+    background: transparent !important;
+    border: none !important;
+    padding: 4px 8px;
+    color: #f1f5f9 !important;
+    font-size: 13px;
+}
+
+.excel-cell-select:focus {
+    background-color: #090d16 !important;
+    outline: 2px solid #10b981 !important;
+    outline-offset: -2px;
+}
+
+.excel-save-indicator {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background-color: #10b981;
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.excel-row.modified .excel-save-indicator {
+    opacity: 1; /* Show dot if row is modified */
+}
+
+/* Excel Index columns A, B, C... styling */
+.excel-index-col {
+    background-color: #151c2c;
+    color: #475569;
+    text-align: center !important;
+    font-weight: bold;
+    font-size: 10px;
+    width: 35px;
+    border: 1px solid #334155 !important;
+}

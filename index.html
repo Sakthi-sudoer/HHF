@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="ta">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Healthy Home's Foods - Premium Enterprise Dashboard</title>
+    
+    <!-- PWA Web App Manifest -->
+    <link rel="manifest" href='data:application/manifest+json;base64,ewogICJuYW1lIjogIkhlYWx0aHkgSG9tZSdzIEZvb2RzIiwKICAic2hvcnRfbmFtZSI6ICJIZWFsdGh5SG9tZSIsCiAgInN0YXJ0X3VybCI6ICIuIiwKICAiZGlzcGxheSI6ICJzdGFuZGFsb25lIiwKICAiYmFja2dyb3VuZF9jb2xvciI6ICIjMDU5NjY5IiwKICAidGhlbWVfY29sb3IiOiAiIzA1OTY2OSIsCiAgImljb25zIjogWwogICAgewogICAgICAic3JjIjogImh0dHBzOi8vY2RuLWljb25zLXBuZy5mbGF0aWNvbi5jb20vNTEyLzMwNjIvMzA2Mjk3My5wbmciLAogICAgICAic2l6ZXMiOiAiMTkyeDE5MiIsCiAgICAgICJ0eXBlIjogImltYWdlL3BuZyIKICAgIH0KICBdCn0='>
+    
+    <!-- CSS Loaders (Tailwind CDN, FontAwesome, Google Fonts, and Custom CSS Stylesheet) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght=300;400;500;600;700&family=Mukta+Malar:wght=400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col pb-20 md:pb-6 transition-all duration-300">
+
+    <!-- Top Navigation Header -->
+    <header id="app-header" class="bg-emerald-600 text-white shadow-md sticky top-0 z-40 px-4 py-3 rounded-b-2xl">
+        <div class="max-w-6xl mx-auto flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div id="biz-logo-container" class="bg-white p-1 rounded-full shadow-inner flex items-center justify-center w-11 h-11 overflow-hidden border-2 border-white">
+                    <i class="fa-solid fa-bowl-food text-emerald-600 text-xl" id="default-logo-icon"></i>
+                </div>
+                <div>
+                    <h1 class="text-base md:text-lg font-bold tracking-tight" id="header-biz-name">Healthy Home's Foods</h1>
+                    <p class="text-[10px] text-emerald-100 font-semibold" id="lbl-subtitle">மந்த்லி கணக்கு மற்றும் டியூ டிராக்கர்</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2">
+                <span class="bg-emerald-800/50 text-white px-2 py-1 rounded-xl text-[9px] font-bold flex items-center space-x-1">
+                    <i class="fa-solid fa-cloud text-emerald-300"></i>
+                    <span>Cloud Sync ON</span>
+                </span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="flex-1 max-w-6xl mx-auto w-full px-3 pt-4 space-y-4">
+        
+        <!-- Metrics Stats Board -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-center space-x-3">
+                <div class="p-2.5 bg-emerald-50 rounded-xl text-emerald-600 text-sm"><i class="fa-solid fa-users"></i></div>
+                <div>
+                    <span class="text-[10px] text-slate-400 block font-bold" id="lbl-total-cust">கஸ்டமர்கள்</span>
+                    <span id="stat-total-cust" class="text-base font-bold text-slate-700">0</span>
+                </div>
+            </div>
+            <div class="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-center space-x-3">
+                <div class="p-2.5 bg-blue-50 rounded-xl text-blue-600 text-sm"><i class="fa-solid fa-truck"></i></div>
+                <div>
+                    <span class="text-[10px] text-slate-400 block font-bold" id="lbl-today-deliv">இன்றைய விநியோகம்</span>
+                    <span id="stat-today-deliveries" class="text-xs font-bold text-slate-700">B:0 | L:0 | D:0</span>
+                </div>
+            </div>
+            <div onclick="openEarningsModal()" class="bg-white p-3 rounded-2xl border border-emerald-200 shadow-sm flex items-center space-x-3 cursor-pointer hover:bg-emerald-50/40 transition">
+                <div class="p-2.5 bg-amber-50 rounded-xl text-amber-600 text-sm"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+                <div>
+                    <span class="text-[10px] text-slate-400 block font-bold" id="lbl-total-earn">வசூலானது 👁</span>
+                    <span id="stat-total-earnings" class="text-base font-bold text-emerald-600">₹0</span>
+                </div>
+            </div>
+            <div onclick="openExpensesSummaryModal()" class="bg-white p-3 rounded-2xl border border-rose-200 shadow-sm flex items-center space-x-3 cursor-pointer hover:bg-rose-50/40 transition">
+                <div class="p-2.5 bg-rose-50 rounded-xl text-rose-600 text-sm"><i class="fa-solid fa-receipt"></i></div>
+                <div>
+                    <span class="text-[10px] text-slate-400 block font-bold" id="lbl-total-exp">மொத்தச் செலவு 👁</span>
+                    <span id="stat-total-expenses" class="text-base font-bold text-rose-600">₹0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Desktop Navigation Tabs -->
+        <div class="hidden md:flex bg-white p-1.5 rounded-xl border border-slate-200 shadow-sm gap-2">
+            <button id="d-tab-customers" onclick="switchView('customers')" class="flex-1 py-2.5 text-center text-xs font-bold rounded-lg transition-all bg-emerald-600 text-white">
+                <span id="tab-lbl-cust">வாடிக்கையாளர்கள்</span>
+            </button>
+            <button id="d-tab-delivery" onclick="switchView('delivery')" class="flex-1 py-2.5 text-center text-xs font-bold rounded-lg text-slate-500 hover:bg-slate-50 transition-all">
+                <span id="tab-lbl-deliv">விநியோகத் திட்டம்</span>
+            </button>
+            <button id="d-tab-leave" onclick="switchView('leave')" class="flex-1 py-2.5 text-center text-xs font-bold rounded-lg text-slate-500 hover:bg-slate-50 transition-all">
+                <span id="tab-lbl-leaves">லீவ் & மெனு பிளான்</span>
+            </button>
+            <button id="d-tab-kitchen" onclick="switchView('kitchen')" class="flex-1 py-2.5 text-center text-xs font-bold rounded-lg text-slate-500 hover:bg-slate-50 transition-all">
+                <span id="tab-lbl-kitchen">சமையலறை கணக்கு</span>
+            </button>
+            <button id="d-tab-staff" onclick="switchView('staff')" class="flex-1 py-2.5 text-center text-xs font-bold rounded-lg text-slate-500 hover:bg-slate-50 transition-all">
+                <span id="tab-lbl-staff">டெலிவரி ஆட்கள்</span>
+            </button>
+            <button id="d-tab-expenses" onclick="switchView('expenses')" class="flex-1 py-2.5 text-center text-xs font-bold rounded-lg text-slate-500 hover:bg-slate-50 transition-all">
+                <span id="tab-lbl-accounts">கணக்கு & செலவுகள்</span>
+            </button>
+            <button id="d-tab-control" onclick="switchView('control')" class="flex-1 py-2.5 text-center text-xs font-bold rounded-lg text-slate-500 hover:bg-slate-50 transition-all">
+                <span>நிர்வாகம் (Control) ⚙️</span>
+            </button>
+        </div>
+
+        <!-- VIEW 1: CUSTOMERS -->
+        <div id="view-customers" class="space-y-4">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div class="flex items-center space-x-2">
+                    <h2 class="font-bold text-base text-slate-700" id="lbl-cust-title">வாடிக்கையாளர் கணக்கு டிராக்கர்</h2>
+                    <span class="text-xs bg-slate-200 text-slate-600 px-2.5 py-0.5 rounded-full font-bold" id="badge-cust-count">0 Customers</span>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="openAddModal()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-sm transition" id="btn-add-cust-lbl">புதிய கஸ்டமர் சேர்</button>
+                    <!-- Google Sheet Backup -->
+                    <button onclick="exportAllToSheet()" class="bg-teal-600 hover:bg-teal-700 text-white px-3.5 py-2 rounded-xl text-xs font-bold shadow-sm transition">
+                        <i class="fa-brands fa-google-drive mr-1"></i> Sync All to Sheet
+                    </button>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <input type="text" id="search-bar" placeholder="தேடுக..." class="w-full px-4 py-2.5 bg-white border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500 shadow-sm md:col-span-2">
+                <div class="flex bg-white p-1 rounded-xl border border-slate-200 shadow-sm gap-1">
+                    <button id="btn-all" onclick="applyFilter('all')" class="flex-1 py-1.5 text-center text-[10px] font-bold rounded-lg transition-all active-filter-green">
+                        <span id="lbl-all-filter">அனைவரும்</span>
+                    </button>
+                    <button id="btn-trial" onclick="applyFilter('trial')" class="flex-1 py-1.5 text-center text-[10px] font-bold rounded-lg text-slate-500 hover:bg-slate-50 transition-all">
+                        <span id="lbl-trial-filter">ட்ரையல்</span>
+                    </button>
+                    <button id="btn-unpaid" onclick="applyFilter('unpaid')" class="flex-1 py-1.5 text-center text-[10px] font-bold rounded-lg text-slate-500 hover:bg-slate-50 transition-all">
+                        <span id="lbl-unpaid-filter">நிலுவை</span>
+                    </button>
+                </div>
+            </div>
+            <div id="customer-cards-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+        </div>
+
+        <!-- VIEW 2: DELIVERY -->
+        <div id="view-delivery" class="space-y-4 hidden">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                <div><h2 class="font-bold text-base text-slate-700" id="lbl-deliv-title">தினசரி உணவு விநியோகப் பட்டியல்</h2></div>
+                <button onclick="printDeliveryChecklist()" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2.5 rounded-xl text-xs font-bold transition">Print Checklist</button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div class="flex bg-white p-1 rounded-xl border border-slate-200 shadow-sm gap-1 md:col-span-2">
+                    <button onclick="setMealSession('all')" id="meal-all" class="flex-1 py-2 text-center text-xs font-bold rounded-lg bg-emerald-600 text-white shadow">அனைத்தும்</button>
+                    <button onclick="setMealSession('breakfast')" id="meal-b" class="flex-1 py-2 text-center text-xs font-bold rounded-lg text-slate-500">Breakfast</button>
+                    <button onclick="setMealSession('lunch')" id="meal-l" class="flex-1 py-2 text-center text-xs font-bold rounded-lg text-slate-500">Lunch</button>
+                    <button onclick="setMealSession('dinner')" id="meal-d" class="flex-1 py-2 text-center text-xs font-bold rounded-lg text-slate-500">Dinner</button>
+                </div>
+                <select id="route-staff-filter" class="px-3 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 shadow-sm focus:outline-none">
+                    <option value="all">அனைத்து ஊழியர்கள்</option>
+                </select>
+            </div>
+            <div id="delivery-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+        </div>
+
+        <!-- VIEW 3: LEAVE & WEEKLY PLAN -->
+        <div id="view-leave" class="space-y-4 hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div class="bg-white p-4 rounded-2xl border shadow-sm space-y-3 h-fit text-xs">
+                    <h3 class="font-bold text-xs text-emerald-800 uppercase tracking-wider" id="lbl-leave-reg-title">கஸ்டமர் லீவ் பதிவு</h3>
+                    <form id="leave-form" onsubmit="saveLeave(event)" class="space-y-3">
+                        <div>
+                            <label class="block font-bold text-slate-400 mb-1" id="lbl-leave-cust">கஸ்டமர் பெயர் *</label>
+                            <select id="leave-cust-id" required class="w-full p-2 bg-slate-50 border rounded-xl focus:outline-none"></select>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-400 mb-1" id="lbl-leave-date">தேதி *</label>
+                            <input type="date" id="leave-date" required class="w-full p-2 bg-slate-50 border rounded-xl focus:outline-none" onchange="calculateContinuousLeaveExtension()">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-400 mb-1" id="lbl-leave-days">நாட்கள் *</label>
+                            <input type="number" id="leave-days-count" min="1" value="1" required class="w-full p-2 bg-slate-50 border rounded-xl focus:outline-none" oninput="calculateContinuousLeaveExtension()">
+                        </div>
+                        <div class="bg-emerald-50 p-2 rounded-xl text-center">
+                            <span class="block text-[10px] font-bold text-emerald-800 uppercase" id="lbl-calculated-extend">புதிய முடிவு தேதி</span>
+                            <span id="leave-extended-preview" class="font-bold text-emerald-700">-</span>
+                        </div>
+                        <button type="submit" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition" id="btn-save-leave-lbl">லீவ் சேமி</button>
+                    </form>
+                </div>
+                <div class="lg:col-span-2 bg-white p-4 rounded-2xl border shadow-sm space-y-2">
+                    <h3 class="font-bold text-xs text-slate-400 uppercase" id="lbl-leave-history">லீவ் வரலாறு / Skip Logs</h3>
+                    <div class="max-h-[300px] overflow-y-auto scroll-container">
+                        <table class="w-full text-left text-xs">
+                            <thead>
+                                <tr class="border-b bg-slate-50 text-slate-500 font-bold">
+                                    <th class="p-2">கஸ்டமர்</th>
+                                    <th class="p-2">லீவ் நாட்கள்</th>
+                                    <th class="p-2">முடிவு தேதி</th>
+                                    <th class="p-2 text-center" style="width: 50px;">அழி</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leave-history-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 4: KITCHEN PRODUCTION -->
+        <div id="view-kitchen" class="space-y-4 hidden">
+            <div class="bg-white p-4 rounded-2xl border shadow-sm space-y-3">
+                <div class="flex justify-between items-center border-b pb-2">
+                    <h2 class="font-bold text-base text-slate-800"><i class="fa-solid fa-kitchen-set text-emerald-600"></i> சமையலறை மளிகை தேவை கணக்கீடு</h2>
+                </div>
+                <div class="bg-slate-50 p-4 rounded-xl border grid grid-cols-2 md:grid-cols-4 gap-4 text-xs font-semibold">
+                    <div>
+                        <label class="block text-[10px] text-slate-400 uppercase mb-1">அரிசி அளவு</label>
+                        <div class="flex items-center space-x-1">
+                            <input type="number" id="portion-rice" value="120" class="w-16 p-1 border rounded text-center focus:outline-none">
+                            <span>g</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-slate-400 uppercase mb-1">பருப்பு அளவு</label>
+                        <div class="flex items-center space-x-1">
+                            <input type="number" id="portion-dal" value="30" class="w-16 p-1 border rounded text-center focus:outline-none">
+                            <span>g</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-slate-400 uppercase mb-1">காய்கறிகள்</label>
+                        <div class="flex items-center space-x-1">
+                            <input type="number" id="portion-veg" value="100" class="w-16 p-1 border rounded text-center focus:outline-none">
+                            <span>g</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-slate-400 uppercase mb-1">எண்ணெய்</label>
+                        <div class="flex items-center space-x-1">
+                            <input type="number" id="portion-oil" value="15" class="w-16 p-1 border rounded text-center focus:outline-none">
+                            <span>ml</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
+                    <div class="bg-emerald-50 p-4 rounded-xl border flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] text-slate-400 font-bold block">மொத்த அரிசி (Rice)</span>
+                            <h4 class="text-base font-bold text-emerald-800" id="kit-sum-rice">0 kg</h4>
+                        </div>
+                    </div>
+                    <div class="bg-sky-50 p-4 rounded-xl border flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] text-slate-400 font-bold block">மொத்த பருப்பு (Dal)</span>
+                            <h4 class="text-base font-bold text-sky-800" id="kit-sum-dal">0 kg</h4>
+                        </div>
+                    </div>
+                    <div class="bg-amber-50 p-4 rounded-xl border flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] text-slate-400 font-bold block">மொத்த காய்கறி (Veg)</span>
+                            <h4 class="text-base font-bold text-amber-800" id="kit-sum-veg">0 kg</h4>
+                        </div>
+                    </div>
+                    <div class="bg-purple-50 p-4 rounded-xl border flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] text-slate-400 font-bold block">மொத்த எண்ணெய் (Oil)</span>
+                            <h4 class="text-base font-bold text-purple-800" id="kit-sum-oil">0 Litres</h4>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 5: STAFF MANAGEMENT -->
+        <div id="view-staff" class="space-y-4 hidden">
+            <h2 class="font-bold text-base text-slate-700" id="lbl-staff-mgt-title">டெலிவரி ஊழியர்கள் மேலாண்மை</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                <div class="bg-white p-4 rounded-2xl border space-y-3 h-fit">
+                    <h3 class="font-bold text-xs text-emerald-800 uppercase" id="lbl-add-staff-title">புதிய டெலிவரி ஆள் சேர்க்க</h3>
+                    <form id="staff-form" onsubmit="saveStaff(event)" class="space-y-3">
+                        <input type="text" id="staff-name" required placeholder="ஊழியர் பெயர்..." class="w-full p-2.5 bg-slate-50 border rounded-xl focus:outline-none">
+                        <button type="submit" class="w-full py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow transition">டெலிவரி ஆள் சேமி</button>
+                    </form>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border md:col-span-2 space-y-2">
+                    <h3 class="font-bold text-xs text-slate-400 uppercase">டெலிவரி ஊழியர்கள் பட்டியல்</h3>
+                    <div class="max-h-[300px] overflow-y-auto scroll-container">
+                        <table class="w-full text-left">
+                            <thead>
+                                <tr class="border-b font-bold bg-slate-50 text-slate-500">
+                                    <th class="p-2.5">பெயர்</th>
+                                    <th class="p-2.5 text-center" style="width: 50px;">அழி</th>
+                                </tr>
+                            </thead>
+                            <tbody id="staff-history-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 6: EXPENSES CONSOLE -->
+        <div id="view-expenses" class="space-y-4 hidden">
+            <div class="bg-white p-4 rounded-2xl border shadow-sm space-y-3">
+                <div>
+                    <h3 class="font-bold text-sm text-slate-800"><i class="fa-solid fa-chart-line text-emerald-600"></i> அசல் வரவு செலவு கணக்கு</h3>
+                </div>
+                <div class="border-t pt-2 space-y-1.5">
+                    <span class="text-[10px] text-slate-400 font-bold uppercase block">பார்வை காலத்தை தேர்வு செய்யவும்</span>
+                    <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar py-1" id="accounting-month-tabs"></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                <div class="bg-gradient-to-br from-emerald-50 to-teal-50 border p-4 rounded-2xl space-y-1">
+                    <span class="text-[10px] text-slate-400 block font-bold uppercase">அசல் வருவாய்</span>
+                    <h4 class="text-xl font-bold text-emerald-800" id="acc-lbl-earned">₹0</h4>
+                </div>
+                <div class="bg-gradient-to-br from-rose-50 to-orange-50 border p-4 rounded-2xl space-y-1">
+                    <span class="text-[10px] text-slate-400 block font-bold uppercase">அசல் செலவுகள்</span>
+                    <h4 class="text-xl font-bold text-rose-800" id="acc-lbl-expenses">₹0</h4>
+                </div>
+                <div class="bg-gradient-to-br from-sky-50 to-indigo-50 border p-4 rounded-2xl space-y-1">
+                    <span class="text-[10px] text-slate-400 block font-bold uppercase">அசல் நிகர லாபம்</span>
+                    <h4 class="text-xl font-bold text-sky-800" id="acc-lbl-profit">₹0</h4>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-4 h-fit text-xs">
+                    <h3 class="font-bold text-xs text-rose-800 uppercase tracking-wider" id="lbl-expense-reg">செலவு பதிவு செய்க</h3>
+                    <form id="expense-form" onsubmit="saveExpense(event)" class="space-y-3">
+                        <input type="date" id="exp-date" required class="w-full p-2.5 bg-slate-50 border rounded-xl focus:outline-none">
+                        <input type="text" id="exp-item" required placeholder="செலவு விபரம்..." class="w-full p-2.5 bg-slate-50 border rounded-xl focus:outline-none">
+                        <input type="number" id="exp-amount" required placeholder="செலவு ரூபாய்..." class="w-full p-2.5 bg-slate-50 border rounded-xl focus:outline-none">
+                        <select id="exp-category" class="w-full p-2.5 bg-slate-50 border rounded-xl focus:outline-none font-medium text-slate-700">
+                            <option value="Groceries">Groceries / மளிகைப் பொருட்கள்</option>
+                            <option value="Vegetables">Vegetables / காய்கறிகள்</option>
+                            <option value="Petrol">Petrol / டெலிவரி பெட்ரோல்</option>
+                            <option value="Wages">Wages / ஆட்கள் சம்பளம்</option>
+                            <option value="Rent">Rent / இதர செலவுகள்</option>
+                        </select>
+                        <button type="submit" class="w-full py-2.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl font-bold shadow-sm transition" id="btn-save-exp-lbl">செலவைச் சேமி</button>
+                    </form>
+                </div>
+                <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm lg:col-span-2 space-y-3">
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <h3 class="font-bold text-xs text-slate-400 uppercase tracking-wider" id="lbl-expense-list">செலவுகள் பட்டியல்</h3>
+                    </div>
+                    <div class="max-h-72 overflow-y-auto scroll-container">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 font-bold border-b text-slate-500">
+                                    <th class="p-2.5" id="lbl-tbl-exp-date">தேதி</th>
+                                    <th class="p-2.5" id="lbl-tbl-exp-item">விபரம்</th>
+                                    <th class="p-2.5" id="lbl-tbl-exp-cat">வகை</th>
+                                    <th class="p-2.5" id="lbl-tbl-exp-amt">தொகை</th>
+                                    <th class="p-2.5 text-center" id="lbl-tbl-exp-del" style="width: 50px;">அழி</th>
+                                </tr>
+                            </thead>
+                            <tbody id="expense-history-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- VIEW 7: MAIN CONTROL PANEL (EXCEL MASTER SPREADSHEET) -->
+        <div id="view-control" class="space-y-4 hidden">
+            <div class="bg-white p-4 rounded-2xl border border-slate-800 shadow-sm space-y-3">
+                <div class="flex justify-between items-center flex-wrap gap-2">
+                    <h2 class="font-bold text-base text-slate-800 flex items-center space-x-2">
+                        <i class="fa-solid fa-table text-emerald-500"></i>
+                        <span>Excel Master Control Panel / அசல் மேலாண்மை பக்கம்</span>
+                    </h2>
+                    <span class="text-xs bg-slate-800 border border-slate-700 text-slate-400 px-3 py-1 rounded-xl font-bold uppercase" id="excel-active-tab-badge">Customers Sheet</span>
+                </div>
+                <p class="text-xs text-slate-500 font-medium">இங்கு கஸ்டமர் விபரங்கள், சமையலறை பயன்பாட்டு பொருட்கள் (Gas, Electricity), மற்றும் ஊழியர்கள் அட்டவணையை எக்செல் தாளினைப்போல் சுலபமாக தொகுக்க முடியும். மாற்றங்கள் உடனுக்குடன் சேமிக்கப்படும்.</p>
+            </div>
+            
+            <!-- Excel Sub Tabs -->
+            <div class="flex items-center space-x-2 overflow-x-auto no-scrollbar py-1 gap-1 border-b border-slate-800">
+                <button onclick="window.switchExcelTab('customers')" id="btn-excel-tab-customers" class="px-4 py-2 rounded-xl text-xs font-bold bg-emerald-600 text-white shadow-md transition-all">📋 Customers Sheet</button>
+                <button onclick="window.switchExcelTab('kitchen')" id="btn-excel-tab-kitchen" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-all">🍳 Kitchen & Expenses</button>
+                <button onclick="window.switchExcelTab('leaves')" id="btn-excel-tab-leaves" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-all">🍃 Leaves Sheet</button>
+                <button onclick="window.switchExcelTab('skips')" id="btn-excel-tab-skips" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-all">⚠️ Skips Sheet</button>
+                <button onclick="window.switchExcelTab('staff')" id="btn-excel-tab-staff" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-400 hover:bg-slate-800 transition-all">👥 Staff Sheet</button>
+            </div>
+
+            <!-- Search and Action control bar -->
+            <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
+                <div class="relative flex items-center flex-1 max-w-md">
+                    <input type="text" id="excel-search-bar" onkeyup="window.filterExcelRows()" placeholder="தேடுக (Search spreadsheet)..." class="w-full px-4 py-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs focus:outline-none focus:ring-1 focus:ring-emerald-500 shadow-inner">
+                </div>
+                <div class="flex items-center justify-end space-x-3">
+                    <span class="text-xs text-emerald-500 font-semibold italic flex items-center space-x-1" id="excel-saving-label" style="display:none;">
+                        <i class="fa-solid fa-arrows-rotate fa-spin text-xs"></i> <span>Auto-Saving...</span>
+                    </span>
+                    <button id="btn-excel-add-row" onclick="window.addExcelRow()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-xl text-xs font-bold shadow transition flex items-center space-x-1.5">
+                        <i class="fa-solid fa-plus text-xs"></i> <span>Add Row / சேர்க்க</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Master Excel Grid Container -->
+            <div class="excel-container max-h-[480px] overflow-auto scroll-container border shadow-2xl rounded-2xl">
+                <table class="excel-table" id="excel-master-table">
+                    <!-- Dynamically drawn by ui-render.js -->
+                </table>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Bottom Sticky Mobile Navigation -->
+    <nav class="md:hidden bg-white border-t fixed bottom-0 left-0 right-0 z-40 rounded-t-2xl shadow-xl flex justify-around items-center h-16 max-w-md mx-auto">
+        <button onclick="switchView('customers')" id="m-nav-customers" class="flex flex-col items-center justify-center text-emerald-600 font-bold text-[10px]">
+            <i class="fa-solid fa-user-group text-lg"></i>
+            <span id="m-lbl-cust">கஸ்டமர்கள்</span>
+        </button>
+        <button onclick="switchView('delivery')" id="m-nav-delivery" class="flex flex-col items-center justify-center text-slate-400 text-[10px]">
+            <i class="fa-solid fa-truck-fast text-lg"></i>
+            <span id="m-lbl-deliv">விநியோகம்</span>
+        </button>
+        <button onclick="switchView('leave')" id="m-nav-leave" class="flex flex-col items-center justify-center text-slate-400 text-[10px]">
+            <i class="fa-solid fa-calendar-minus text-lg"></i>
+            <span id="m-lbl-leaves">லீவ்</span>
+        </button>
+        <button onclick="switchView('expenses')" id="m-nav-expenses" class="flex flex-col items-center justify-center text-slate-400 text-[10px]">
+            <i class="fa-solid fa-shield-halved text-lg"></i>
+            <span id="m-lbl-accounts">கணக்கு</span>
+        </button>
+        <button onclick="switchView('control')" id="m-nav-control" class="flex flex-col items-center justify-center text-slate-400 text-[10px]">
+            <i class="fa-solid fa-gears text-lg"></i>
+            <span id="m-lbl-control">நிர்வாகம்</span>
+        </button>
+    </nav>
+
+    <!-- CUSTOMER DIALOG MODAL (WITH COMPANY FIELD) -->
+    <div id="customer-modal" class="fixed inset-0 bg-black/60 hidden items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+        <div class="bg-white rounded-t-3xl sm:rounded-2xl w-full max-w-md shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div class="bg-emerald-600 px-5 py-4 text-white flex justify-between items-center" id="modal-header">
+                <h3 id="modal-title" class="font-bold text-base">வாடிக்கையாளர்</h3>
+                <button type="button" onclick="closeModal()"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form id="customer-form" onsubmit="saveCustomer(event)" class="p-5 space-y-4 overflow-y-auto pb-12 flex-1 text-xs scroll-container">
+                <input type="hidden" id="edit-id">
+                
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-bold text-slate-400 mb-1">பெயர் *</label>
+                        <input type="text" id="cust-name" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-400 mb-1">போன் எண் *</label>
+                        <input type="tel" id="cust-phone" required class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none">
+                    </div>
+                    <!-- FIELD: COMPANY NAME -->
+                    <div class="col-span-2">
+                        <label class="block font-bold text-slate-400 mb-1">கம்பெனி பெயர் (Company Name)</label>
+                        <input type="text" id="cust-company" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none" placeholder="ஏதேனும் இருந்தால் பதிவு செய்யவும்">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block font-bold text-slate-400 mb-1">முகவரி</label>
+                    <textarea id="cust-address" class="w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none"></textarea>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-400 mb-1">டெலிவரி ஊழியர் *</label>
+                    <select id="cust-staff-id" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl font-bold text-slate-700 focus:outline-none"></select>
+                </div>
+                
+                <div class="bg-emerald-50/50 p-3 rounded-2xl border border-emerald-100">
+                    <label class="block font-bold text-emerald-800 mb-2">உணவுத் திட்டம் & அளவு</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="flex flex-col items-center justify-between p-2 bg-white rounded-xl border border-slate-200">
+                            <label class="text-[10px] font-bold flex flex-col items-center w-full cursor-pointer">
+                                <input type="checkbox" id="plan-breakfast" class="mb-1" onchange="toggleQtyInput('breakfast')">Breakfast
+                            </label>
+                            <div id="qty-container-breakfast" class="mt-1 flex items-center bg-slate-50 border rounded px-1 hidden">
+                                <input type="number" id="qty-breakfast" min="1" value="1" class="w-8 text-center bg-transparent text-xs font-bold focus:outline-none">
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center justify-between p-2 bg-white rounded-xl border border-slate-200">
+                            <label class="text-[10px] font-bold flex flex-col items-center w-full cursor-pointer">
+                                <input type="checkbox" id="plan-lunch" class="mb-1" onchange="toggleQtyInput('lunch')">Lunch
+                            </label>
+                            <div id="qty-container-lunch" class="mt-1 flex items-center bg-slate-50 border rounded px-1 hidden">
+                                <input type="number" id="qty-lunch" min="1" value="1" class="w-8 text-center bg-transparent text-xs font-bold focus:outline-none">
+                            </div>
+                        </div>
+                        <div class="flex flex-col items-center justify-between p-2 bg-white rounded-xl border border-slate-200">
+                            <label class="text-[10px] font-bold flex flex-col items-center w-full cursor-pointer">
+                                <input type="checkbox" id="plan-dinner" class="mb-1" onchange="toggleQtyInput('dinner')">Dinner
+                            </label>
+                            <div id="qty-container-dinner" class="mt-1 flex items-center bg-slate-50 border rounded px-1 hidden">
+                                <input type="number" id="qty-dinner" min="1" value="1" class="w-8 text-center bg-transparent text-xs font-bold focus:outline-none">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-slate-50 p-3 rounded-xl border space-y-2">
+                    <div class="flex items-center space-x-2">
+                        <input type="checkbox" id="cust-istrial" onchange="onTrialToggle()" class="w-4 h-4 text-emerald-600 rounded">
+                        <label for="cust-istrial" class="text-xs font-bold text-slate-600">இது 6 நாட்கள் ட்ரையல் காலமா?</label>
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block font-bold text-slate-400 mb-1">துவக்க தேதி</label>
+                            <input type="date" id="cust-start" class="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-xl focus:outline-none">
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-400 mb-1">முடிவு தேதி</label>
+                            <div class="flex space-x-1">
+                                <input type="date" id="cust-end" class="w-full px-2 py-1.5 bg-white border border-slate-200 rounded-xl focus:outline-none">
+                                <button type="button" onclick="autoCalculateEndDate()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2 rounded-xl text-[10px] font-bold transition">
+                                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 bg-amber-50/40 p-3 rounded-2xl border border-amber-100">
+                    <div>
+                        <label class="block font-bold text-amber-900 mb-1">மொத்த கட்டணம் (₹)</label>
+                        <input type="number" id="cust-cost" oninput="calculateBalance()" class="w-full px-3 py-1.5 bg-white border rounded-xl focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-amber-900 mb-1">செலுத்தியது (₹)</label>
+                        <input type="number" id="cust-paid" oninput="calculateBalance()" class="w-full px-3 py-1.5 bg-white border rounded-xl focus:outline-none">
+                    </div>
+                    <div class="col-span-2 flex justify-between items-center pt-2 border-t border-amber-200/50">
+                        <span class="text-xs font-bold text-amber-900">நிலுவைத் தொகை:</span>
+                        <span id="cust-balance" class="text-sm font-bold text-rose-600">₹0</span>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-400 mb-1">குறிப்புகள்</label>
+                    <input type="text" id="cust-notes" class="w-full px-3.5 py-2 bg-slate-50 border rounded-xl focus:outline-none">
+                </div>
+                
+                <div class="flex space-x-3 pt-2">
+                    <button type="button" onclick="closeModal()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl font-bold transition">Cancel</button>
+                    <button type="submit" id="btn-save-customer" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold transition shadow-md">சேமி / Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Confirm Delete dialog modal -->
+    <div id="confirm-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl w-full max-w-xs shadow-2xl p-5 text-center text-xs">
+            <h3 class="font-bold text-sm text-slate-800">உறுதியாகவா?</h3>
+            <p class="text-xs text-slate-500 mt-1.5">இந்த விபரம் முற்றிலும் நீக்கப்படும்.</p>
+            <div class="flex space-x-2.5 mt-4">
+                <button onclick="closeConfirmModal()" class="flex-1 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-bold text-slate-600 transition">Cancel</button>
+                <button id="confirm-yes-btn" class="flex-1 py-2 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-xs font-bold shadow-sm transition">நீக்கு</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN PASSWORD PROMPT MODAL -->
+    <div id="password-prompt-modal" class="fixed inset-0 bg-black/60 hidden items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-2xl w-full max-w-xs shadow-2xl p-5 text-center text-xs space-y-4">
+            <div class="text-emerald-600"><i class="fa-solid fa-lock text-3xl"></i></div>
+            <div>
+                <h3 class="font-bold text-sm text-slate-800">நிர்வாக கடவுச்சொல் (Admin Access)</h3>
+                <p class="text-xs text-slate-500 mt-1">தொடர கடவுச்சொல்லை உள்ளிடவும்.</p>
+            </div>
+            <input type="password" id="admin-password-input" placeholder="Password..." class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none text-center font-bold text-slate-800">
+            <div class="flex space-x-2.5 pt-1">
+                <button onclick="closePasswordModal()" class="flex-1 py-2 bg-slate-100 hover:bg-slate-200 rounded-xl text-xs font-bold text-slate-600 transition">Cancel</button>
+                <button onclick="verifyAdminPassword()" class="flex-1 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold shadow-sm transition">சரி / Verify</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Toast Alert -->
+    <div id="toast" class="fixed bottom-20 left-1/2 -translate-x-1/2 bg-slate-900/95 text-white text-xs px-4 py-3 rounded-full shadow-xl transform translate-y-20 opacity-0 transition-all duration-300 z-50 flex items-center space-x-2 whitespace-nowrap">
+        <span id="toast-icon"></span>
+        <span id="toast-message" class="font-medium"></span>
+    </div>
+
+    <!-- Main JavaScript Modules -->
+    <!-- 1. Firebase Compat Core SDK libraries -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <!-- 2. Custom Application Script Modules -->
+    <script src="js/firebase-db.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/ui-render.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
