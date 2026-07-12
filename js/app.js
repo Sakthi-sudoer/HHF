@@ -12,6 +12,10 @@ window.switchView = function(viewId) {
         return; // Don't switch view yet!
     }
 
+    if (viewId === 'settings' && typeof window.renderSettingsView === 'function') {
+        window.renderSettingsView();
+    }
+
     window.activeView = viewId;
     
     // Auto-lock when switching away from control panel
@@ -20,7 +24,7 @@ window.switchView = function(viewId) {
     }
     
     // Hide all views
-    const views = ['customers', 'delivery', 'leave', 'kitchen', 'staff', 'expenses', 'control'];
+    const views = ['customers', 'delivery', 'leave', 'kitchen', 'staff', 'expenses', 'control', 'settings'];
     views.forEach(v => {
         const el = document.getElementById('view-' + v);
         if (el) el.classList.add('hidden');
@@ -43,11 +47,10 @@ window.switchView = function(viewId) {
     });
 
     // Update Bottom Sticky Mobile Navigation
-    const mobileNavs = ['customers', 'delivery', 'leave', 'expenses', 'control'];
+    const mobileNavs = ['customers', 'delivery', 'leave', 'expenses', 'control', 'settings'];
     mobileNavs.forEach(nav => {
         const mEl = document.getElementById('m-nav-' + nav);
         if (mEl) {
-            // Map kitchen to leaves tab for mobile icons
             const mappedViewId = (viewId === 'kitchen') ? 'leave' : viewId;
             if (nav === mappedViewId) {
                 mEl.classList.add('text-emerald-600', 'font-bold');
@@ -133,12 +136,13 @@ window.toggleQtyInput = function(meal) {
 
 window.onPaymentTermChanged = function() {
     const isTrial = document.getElementById('cust-istrial').checked;
+    const biz = window.appSettings || {};
     if (isTrial) {
-        document.getElementById('cust-cost').value = 1200;
-        document.getElementById('cust-paid').value = 1200;
+        document.getElementById('cust-cost').value = biz.priceTrial || 1200;
+        document.getElementById('cust-paid').value = biz.priceTrial || 1200;
     } else {
-        document.getElementById('cust-cost').value = 5800;
-        document.getElementById('cust-paid').value = 5800;
+        document.getElementById('cust-cost').value = biz.priceMonthly || 5800;
+        document.getElementById('cust-paid').value = biz.priceMonthly || 5800;
     }
     calculateBalance();
 };
@@ -480,6 +484,7 @@ window.updateLeaveDropdown = function() {
 window.updateStaffDropdowns = function() {
     const s1 = document.getElementById('cust-staff-id');
     const s2 = document.getElementById('route-staff-filter');
+    const sBulk = document.getElementById('bulk-staff-assign');
     
     const staffOptionsHtml = window.staffList.map(s => `<option value="${s.id}">${s.name}</option>`).join('');
     
@@ -489,13 +494,16 @@ window.updateStaffDropdowns = function() {
     if (s2) {
         s2.innerHTML = '<option value="all">அனைத்து ஊழியர்கள்</option>' + staffOptionsHtml;
     }
+    if (sBulk) {
+        sBulk.innerHTML = '<option value="">Assign Delivery Staff...</option>' + staffOptionsHtml;
+    }
 };
 
 // Password Modal actions
 window.verifyAdminPassword = function() {
     const pwdInput = document.getElementById('admin-password-input');
     const pwd = pwdInput.value;
-    const ADMIN_PASSWORD = "1234";
+    const ADMIN_PASSWORD = window.appSettings.adminPassword || "1234";
     
     if (pwd === ADMIN_PASSWORD) {
         window.isControlUnlocked = true;
@@ -639,6 +647,40 @@ window.addEventListener('DOMContentLoaded', () => {
     // Dynamic calculate relative date in local time for daily calculations
     const today = new Date();
     window.todayDateStr = today.toLocaleDateString('sv').substring(0, 10); // YYYY-MM-DD format
+    window.plannerDateStr = window.todayDateStr;
+
+    // Set planner date default
+    const plannerDateSelect = document.getElementById('planner-date-select');
+    if (plannerDateSelect) {
+        plannerDateSelect.value = window.todayDateStr;
+        plannerDateSelect.addEventListener('change', (e) => {
+            window.loadPlannerDateDeliveries(e.target.value);
+        });
+    }
+
+    // Sort select listener
+    const plannerSortSelect = document.getElementById('planner-sort-select');
+    if (plannerSortSelect) {
+        plannerSortSelect.addEventListener('change', () => {
+            if (typeof renderDeliveryChecklistOnly === 'function') {
+                renderDeliveryChecklistOnly();
+            }
+        });
+    }
+
+    // Select All checkbox listener
+    const selectAllCheckbox = document.getElementById('planner-select-all');
+    if (selectAllCheckbox) {
+        selectAllCheckbox.addEventListener('change', (e) => {
+            const checked = e.target.checked;
+            document.querySelectorAll('.planner-card-checkbox').forEach(cb => {
+                cb.checked = checked;
+            });
+            if (typeof window.updateSelectedCount === 'function') {
+                window.updateSelectedCount();
+            }
+        });
+    }
     
     // Hide customer card dropdowns when clicking outside
     window.addEventListener('click', (e) => {
@@ -681,8 +723,8 @@ window.addEventListener('DOMContentLoaded', () => {
     const skipDate = document.getElementById('skip-date');
     if (skipDate) skipDate.value = window.todayDateStr;
 
-    // Run first UI drawing loop (loads localStorage caches values first)
-    renderAll();
+    // Load deliveries for default date and run first UI drawing loop
+    window.loadPlannerDateDeliveries(window.todayDateStr);
     
     // Connect to Firebase real-time listeners for instant updates
     initRealtimeSync();

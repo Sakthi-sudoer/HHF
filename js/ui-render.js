@@ -220,51 +220,139 @@ function renderStaffView() {
 }
 
 // 5. Renders Daily Delivery Checklist Sheet (Delivery Plan Tab)
+window.plannerDeliveryStatus = {};
+
+// Helper to determine if a date is within "this week" (Sunday to Saturday)
+function isThisWeek(dateStr) {
+    if (!dateStr) return false;
+    const d = new Date(dateStr);
+    const today = new Date();
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - today.getDay());
+    startOfWeek.setHours(0,0,0,0);
+    
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setHours(23,59,59,999);
+    
+    return d >= startOfWeek && d <= endOfWeek;
+}
+
+// Decoupled loader for planner dates
+window.loadPlannerDateDeliveries = async function(dateStr) {
+    window.plannerDateStr = dateStr;
+    const dateInput = document.getElementById('planner-date-select');
+    if (dateInput) dateInput.value = dateStr;
+    
+    try {
+        const doc = await db.collection("deliveries").doc(dateStr).get();
+        window.plannerDeliveryStatus = doc.exists ? (doc.data() || {}) : {};
+        localStorage.setItem('hh_deliveries_v8_' + dateStr, JSON.stringify(window.plannerDeliveryStatus));
+    } catch (e) {
+        console.error("Error loading deliveries for date:", dateStr, e);
+        window.plannerDeliveryStatus = JSON.parse(localStorage.getItem('hh_deliveries_v8_' + dateStr) || '{}');
+    }
+    
+    // Trigger render
+    renderDeliveryChecklistOnly();
+};
+
 function renderDeliveryChecklist() {
+    const dateInput = document.getElementById('planner-date-select');
+    const dateStr = dateInput ? dateInput.value : (window.plannerDateStr || window.todayDateStr);
+    
+    if (dateStr !== window.plannerDateStr) {
+        window.loadPlannerDateDeliveries(dateStr);
+    } else {
+        renderDeliveryChecklistOnly();
+    }
+}
+
+function renderDeliveryChecklistOnly() {
     const container = document.getElementById('delivery-list');
     if (!container) return;
     container.innerHTML = '';
 
     const session = window.activeMealSession || 'all';
     const staffFilterId = document.getElementById('route-staff-filter').value;
-    
-    const todayStr = window.todayDateStr;
-    const today = new Date(todayStr);
+    const dateStr = window.plannerDateStr || window.todayDateStr;
+    const today = new Date(dateStr);
     today.setHours(0,0,0,0);
-    const isSunday = today.getDay() === 0;
 
-    if (isSunday) {
-        container.innerHTML = `
-            <div class="col-span-full text-center py-10 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl">
-                <i class="fa-solid fa-calendar-xmark text-3xl mb-2"></i>
-                <h4 class="font-bold text-sm">ஞாயிற்றுக்கிழமை - விநியோக விடுமுறை</h4>
-                <p class="text-xs mt-1">Sundays are standard catering holidays.</p>
-            </div>
-        `;
-        return;
-    }
+    // 1. Calculate Planned / Leave / Unassigned Stats
+    let totalB = 0, totalL = 0, totalD = 0;
+    let onLeaveCount = 0;
+    let unassignedCount = 0;
 
-    // Filter active customers for today
-    let activeList = window.customers.filter(c => {
-        // Must have valid dates
-        if (!c.start || !c.end) return false;
-        
+    window.customers.forEach(c => {
+        if (!c.start || !c.end) return;
         const start = new Date(c.start);
         const end = new Date(c.end);
         
-        // Active range check
-        if (today < start || today > end) return false;
+        const inRange = today >= start && today <= end;
+        const onLeave = isCustomerOnLeave(c.id, dateStr);
+        const altB = isAlternateMealScheduled(c.id, dateStr, 'breakfast');
+        const altL = isAlternateMealScheduled(c.id, dateStr, 'lunch');
+        const altD = isAlternateMealScheduled(c.id, dateStr, 'dinner');
+
+        if (inRange || altB || altL || altD) {
+            if (onLeave && !altB && !altL && !altD) {
+                onLeaveCount++;
+            } else {
+                const hasB = (c.breakfast && inRange && !isCustomerOnLeaveForMeal(c.id, dateStr, 'breakfast')) || altB;
+                const hasL = (c.lunch && inRange && !isCustomerOnLeaveForMeal(c.id, dateStr, 'lunch')) || altL;
+                const hasD = (c.dinner && inRange && !isCustomerOnLeaveForMeal(c.id, dateStr, 'dinner')) || altD;
+
+                if (hasB || hasL || hasD) {
+                    if (hasB) totalB += (parseInt(c.breakfastQty) || 1);
+                    if (hasL) totalL += (parseInt(c.lunchQty) || 1);
+                    if (hasD) totalD += (parseInt(c.dinnerQty) || 1);
+
+                    const staff = window.staffList.find(s => s.id === c.staffId);
+                    if (!staff) {
+                        unassignedCount++;
+                    }
+                }
+            }
+        }
+    });
+
+    // Update stats UI
+    const statPlanned = document.getElementById('planner-stat-planned');
+    const statLeave = document.getElementById('planner-stat-leave');
+    const statUnplanned = document.getElementById('planner-stat-unplanned');
+    if (statPlanned) statPlanned.innerText = `B:${totalB} | L:${totalL} | D:${totalD}`;
+    if (statLeave) statLeave.innerText = `${onLeaveCount} Customers`;
+    if (statUnplanned) statUnplanned.innerText = `${unassignedCount} Customers`;
+
+    // 2. Filter active customers to show on board
+    let activeList = window.customers.filter(c => {
+        if (!c.start || !c.end) return false;
+        const start = new Date(c.start);
+        const end = new Date(c.end);
         
-        // Check if on leave today
-        if (isCustomerOnLeave(c.id, todayStr)) return false;
+        const inRange = today >= start && today <= end;
+        const altB = isAlternateMealScheduled(c.id, dateStr, 'breakfast');
+        const altL = isAlternateMealScheduled(c.id, dateStr, 'lunch');
+        const altD = isAlternateMealScheduled(c.id, dateStr, 'dinner');
 
-        // Session active check
-        if (session === 'breakfast' && !c.breakfast) return false;
-        if (session === 'lunch' && !c.lunch) return false;
-        if (session === 'dinner' && !c.dinner) return false;
-        if (session === 'all' && !c.breakfast && !c.lunch && !c.dinner) return false;
+        if (!inRange && !altB && !altL && !altD) return false;
+        
+        // If on leave and no alternates are scheduled, filter out of active delivery list
+        const onLeave = isCustomerOnLeave(c.id, dateStr);
+        if (onLeave && !altB && !altL && !altD) return false;
 
-        // Route Staff Filter
+        // Session check
+        const hasB = (c.breakfast && inRange && !isCustomerOnLeaveForMeal(c.id, dateStr, 'breakfast')) || altB;
+        const hasL = (c.lunch && inRange && !isCustomerOnLeaveForMeal(c.id, dateStr, 'lunch')) || altL;
+        const hasD = (c.dinner && inRange && !isCustomerOnLeaveForMeal(c.id, dateStr, 'dinner')) || altD;
+
+        if (session === 'breakfast' && !hasB) return false;
+        if (session === 'lunch' && !hasL) return false;
+        if (session === 'dinner' && !hasD) return false;
+        if (session === 'all' && !hasB && !hasL && !hasD) return false;
+
+        // Staff route filter
         if (staffFilterId !== 'all' && c.staffId !== staffFilterId) return false;
 
         return true;
@@ -274,22 +362,44 @@ function renderDeliveryChecklist() {
         container.innerHTML = `
             <div class="col-span-full text-center py-10 text-slate-400 bg-white rounded-2xl border border-dashed border-slate-200">
                 <i class="fa-solid fa-truck-ramp-box text-3xl mb-2 text-slate-300"></i>
-                <p class="text-xs">இன்றைய விநியோக பட்டியலில் யாரும் இல்லை!</p>
+                <p class="text-xs">விநியோகப் பட்டியலில் தகவல்கள் எதுவும் இல்லை!</p>
             </div>
         `;
         return;
     }
 
+    // 3. Sort active list
+    const sortBy = document.getElementById('planner-sort-select')?.value || 'name';
+    if (sortBy === 'name') {
+        activeList.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortBy === 'staff') {
+        activeList.sort((a, b) => {
+            const sA = window.staffList.find(s => s.id === a.staffId)?.name || 'zzzUnassigned';
+            const sB = window.staffList.find(s => s.id === b.staffId)?.name || 'zzzUnassigned';
+            return sA.localeCompare(sB);
+        });
+    } else if (sortBy === 'area') {
+        activeList.sort((a, b) => (a.address || '').localeCompare(b.address || ''));
+    } else if (sortBy === 'unassigned') {
+        activeList.sort((a, b) => {
+            const hasStaffA = a.staffId && window.staffList.some(s => s.id === a.staffId) ? 1 : 0;
+            const hasStaffB = b.staffId && window.staffList.some(s => s.id === b.staffId) ? 1 : 0;
+            return hasStaffA - hasStaffB; // 0 first
+        });
+    }
+
+    // 4. Render checklist cards
     activeList.forEach(c => {
         const staff = window.staffList.find(s => s.id === c.staffId);
         const staffName = staff ? staff.name : 'Unassigned (ஒதுக்கப்படவில்லை)';
-        
+        const isUnassigned = !staff;
+
         const card = document.createElement('div');
-        card.className = "bg-white rounded-2xl border border-slate-200 p-4 space-y-3 shadow-sm flex flex-col justify-between hover:shadow transition-shadow";
-        
-        // Build meal checkbox UI
+        card.className = `bg-white rounded-2xl border p-4 space-y-3 shadow-sm flex flex-col justify-between hover:shadow transition-shadow relative ${
+            isUnassigned ? 'border-rose-500 bg-rose-50/5' : 'border-slate-200'
+        }`;
+
         let checkboxHtml = '';
-        
         const meals = [
             { id: 'breakfast', label: 'Breakfast', active: c.breakfast, qty: c.breakfastQty || 1 },
             { id: 'lunch', label: 'Lunch', active: c.lunch, qty: c.lunchQty || 1 },
@@ -297,28 +407,33 @@ function renderDeliveryChecklist() {
         ];
 
         meals.forEach(m => {
-            if (m.active && (session === 'all' || session === m.id)) {
-                const isSkipped = isMealSkipped(c.id, todayStr, m.id);
-                if (isSkipped) {
+            const inRange = today >= new Date(c.start) && today <= new Date(c.end);
+            const isAlt = isAlternateMealScheduled(c.id, dateStr, m.id);
+            const normalActive = m.active && inRange;
+            
+            if ((normalActive || isAlt) && (session === 'all' || session === m.id)) {
+                const isLeave = isCustomerOnLeaveForMeal(c.id, dateStr, m.id);
+                if (isLeave && !isAlt) {
                     checkboxHtml += `
                         <div class="flex items-center justify-between p-2 bg-slate-100 rounded-xl border border-slate-200/40 text-slate-400 select-none">
                             <span class="text-xs font-bold flex items-center space-x-1.5 line-through">
                                 <i class="fa-solid ${m.id === 'breakfast' ? 'fa-egg' : m.id === 'lunch' ? 'fa-sun' : 'fa-moon'} opacity-50"></i>
                                 <span>${m.label} (x${m.qty})</span>
                             </span>
-                            <span class="text-[9px] bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full font-bold uppercase border">Cancelled</span>
+                            <span class="text-[9px] bg-slate-200 text-slate-600 px-2 py-0.5 rounded-full font-bold uppercase border">Leave</span>
                         </div>
                     `;
                 } else {
-                    const isDelivered = window.deliveryStatus[c.id] && window.deliveryStatus[c.id][m.id];
+                    const isDelivered = window.plannerDeliveryStatus[c.id] && window.plannerDeliveryStatus[c.id][m.id];
                     checkboxHtml += `
                         <label class="flex items-center justify-between p-2 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200/60 cursor-pointer transition select-none">
-                            <span class="text-xs font-bold text-slate-700 flex items-center space-x-1.5">
+                            <span class="text-xs font-bold text-slate-700 flex items-center space-x-1.5 font-semibold">
                                 <i class="fa-solid ${m.id === 'breakfast' ? 'fa-egg text-amber-500' : m.id === 'lunch' ? 'fa-sun text-orange-500' : 'fa-moon text-indigo-500'}"></i>
                                 <span>${m.label} (x${m.qty})</span>
+                                ${isAlt ? `<span class="text-[9px] bg-amber-100 text-amber-800 px-1.5 py-0.2 rounded font-bold uppercase border border-amber-200">Alt Day</span>` : ''}
                             </span>
                             <input type="checkbox" 
-                                   onchange="window.toggleDeliveryStatus('${c.id}', '${m.id}', this.checked)" 
+                                   onchange="window.toggleDeliveryStatus('${c.id}', '${m.id}', this.checked, '${dateStr}')" 
                                    ${isDelivered ? 'checked' : ''} 
                                    class="w-5 h-5 text-emerald-600 bg-white border-slate-300 rounded-lg focus:ring-emerald-500">
                         </label>
@@ -330,12 +445,22 @@ function renderDeliveryChecklist() {
         card.innerHTML = `
             <div class="space-y-2">
                 <div class="flex justify-between items-start">
-                    <div>
-                        <h4 class="font-bold text-sm text-slate-800 leading-tight">${c.name}</h4>
-                        ${c.companyName ? `<span class="text-[10px] text-slate-400 font-semibold block">${c.companyName}</span>` : ''}
-                        <span class="text-[10px] text-emerald-600 block font-bold"><i class="fa-solid fa-truck text-xs mr-0.5"></i> ${staffName}</span>
+                    <div class="flex items-start space-x-2">
+                        <input type="checkbox" data-cust-id="${c.id}" onchange="window.updateSelectedCount()" class="planner-card-checkbox mt-1 w-4 h-4 text-emerald-600 bg-white border-slate-300 rounded focus:ring-emerald-500">
+                        <div>
+                            <h4 class="font-bold text-sm text-slate-800 leading-tight">${c.name}</h4>
+                            ${c.companyName ? `<span class="text-[10px] text-slate-400 font-semibold block">${c.companyName}</span>` : ''}
+                            ${
+                                isUnassigned ? 
+                                `<span class="text-[9px] bg-rose-600 text-white px-2 py-0.5 rounded-full font-bold uppercase tracking-wider block w-fit mt-0.5"><i class="fa-solid fa-circle-exclamation mr-0.5"></i> No Driver</span>` :
+                                `<span class="text-[10px] text-emerald-600 block font-bold mt-0.5"><i class="fa-solid fa-truck text-xs mr-0.5"></i> ${staffName}</span>`
+                            }
+                        </div>
                     </div>
-                    <a href="tel:${c.phone}" class="p-2 bg-slate-100 rounded-full text-slate-600 text-xs hover:bg-slate-200 transition"><i class="fa-solid fa-phone"></i></a>
+                    <div class="flex items-center space-x-1.5">
+                        <button onclick="window.openPlannerLeaveModal('${c.id}')" class="p-1.5 bg-amber-50 hover:bg-amber-100 rounded-full text-amber-700 text-xs transition border border-amber-200/50" title="Plan Leave / Alternate Day"><i class="fa-solid fa-calendar-plus"></i></button>
+                        <a href="tel:${c.phone}" class="p-1.5 bg-slate-100 rounded-full text-slate-600 text-xs hover:bg-slate-200 transition"><i class="fa-solid fa-phone"></i></a>
+                    </div>
                 </div>
                 <div class="text-[11px] text-slate-500 bg-slate-50 p-2 rounded-xl border leading-snug break-words">${c.address || 'முகவரி இல்லை'}</div>
                 <div class="space-y-1.5 pt-1">
@@ -346,17 +471,272 @@ function renderDeliveryChecklist() {
         `;
         container.appendChild(card);
     });
+
+    // Reset Select All state
+    const selectAllCheckbox = document.getElementById('planner-select-all');
+    if (selectAllCheckbox) selectAllCheckbox.checked = false;
+    window.updateSelectedCount();
 }
 
-// Checkbox action for mark delivered status to Firebase
-window.toggleDeliveryStatus = function(custId, meal, checked) {
-    if (!window.deliveryStatus[custId]) {
-        window.deliveryStatus[custId] = {};
+window.toggleDeliveryStatus = function(custId, meal, checked, dateStr) {
+    if (!window.plannerDeliveryStatus) window.plannerDeliveryStatus = {};
+    if (!window.plannerDeliveryStatus[custId]) window.plannerDeliveryStatus[custId] = {};
+    
+    window.plannerDeliveryStatus[custId][meal] = checked;
+    
+    // Save to Firestore
+    dbSaveDeliveryStatus(dateStr, window.plannerDeliveryStatus)
+        .then(() => {
+            localStorage.setItem('hh_deliveries_v8_' + dateStr, JSON.stringify(window.plannerDeliveryStatus));
+            if (dateStr === window.todayDateStr) {
+                window.deliveryStatus = window.plannerDeliveryStatus;
+            }
+            renderSummary();
+            renderDeliveryChecklistOnly();
+        })
+        .catch(err => {
+            console.error("Save delivery status error:", err);
+            showToast("விநியோக நிலையை சேமிக்க முடியவில்லை!", "error");
+        });
+};
+
+// --- Leave & Alternate Day Modal Actions ---
+window.openPlannerLeaveModal = async function(custId) {
+    const c = window.customers.find(item => item.id === custId);
+    if (!c) return;
+
+    document.getElementById('planner-leave-cust-id').value = custId;
+    document.getElementById('planner-leave-date').value = window.plannerDateStr || window.todayDateStr;
+    document.getElementById('planner-alternate-date').value = '';
+    
+    // Configure default action
+    const actionRadios = document.getElementsByName('planner-action-type');
+    actionRadios[0].checked = true;
+    window.togglePlannerAlternateSection();
+
+    // Check customer meal options
+    document.getElementById('planner-leave-b').checked = c.breakfast || false;
+    document.getElementById('planner-leave-l').checked = c.lunch || false;
+    document.getElementById('planner-leave-d').checked = c.dinner || false;
+
+    // Check if missed food yesterday
+    const warningPanel = document.getElementById('planner-leave-warning');
+    const wasMissed = await wasCustomerMissedYesterday(custId);
+    if (wasMissed) {
+        warningPanel.classList.remove('hidden');
+    } else {
+        warningPanel.classList.add('hidden');
     }
-    window.deliveryStatus[custId][meal] = checked;
-    dbSaveDeliveryStatus(window.todayDateStr, window.deliveryStatus)
-        .then(() => console.log(`Delivery status updated: ${custId} -> ${meal} = ${checked}`))
-        .catch(err => showToast("விநியோக நிலையை புதுப்பிக்க முடியவில்லை!", "error"));
+
+    document.getElementById('planner-leave-modal').style.display = 'flex';
+};
+
+window.closePlannerLeaveModal = function() {
+    document.getElementById('planner-leave-modal').style.display = 'none';
+};
+
+window.togglePlannerAlternateSection = function() {
+    const actionType = document.querySelector('input[name="planner-action-type"]:checked').value;
+    const altSection = document.getElementById('planner-alternate-date-section');
+    if (actionType === 'alternate') {
+        altSection.classList.remove('hidden');
+        // Pre-fill next day
+        const targetDateStr = document.getElementById('planner-leave-date').value;
+        if (targetDateStr) {
+            const nextDay = new Date(targetDateStr);
+            nextDay.setDate(nextDay.getDate() + 1);
+            document.getElementById('planner-alternate-date').value = nextDay.toISOString().slice(0, 10);
+        }
+    } else {
+        altSection.classList.add('hidden');
+    }
+};
+
+window.savePlannerLeave = async function(e) {
+    e.preventDefault();
+    const custId = document.getElementById('planner-leave-cust-id').value;
+    const customer = window.customers.find(item => item.id === custId);
+    if (!customer) return;
+
+    const dateStr = document.getElementById('planner-leave-date').value;
+    const actionType = document.querySelector('input[name="planner-action-type"]:checked').value;
+
+    const meals = [];
+    if (document.getElementById('planner-leave-b').checked) meals.push('breakfast');
+    if (document.getElementById('planner-leave-l').checked) meals.push('lunch');
+    if (document.getElementById('planner-leave-d').checked) meals.push('dinner');
+
+    if (meals.length === 0) {
+        showToast("குறைந்தது ஒரு உணவை தேர்வு செய்க!", "alert");
+        return;
+    }
+
+    const btn = e.target.querySelector('button[type="submit"]');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerText = "Saving...";
+    }
+
+    try {
+        if (actionType === 'alternate') {
+            const alternateDate = document.getElementById('planner-alternate-date').value;
+            if (!alternateDate) {
+                showToast("மாற்றுத் தேதியை தேர்வு செய்க!", "alert");
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerText = "சேமி / Save";
+                }
+                return;
+            }
+
+            const altObj = {
+                id: "alt_" + Date.now(),
+                custId,
+                custName: customer.name,
+                originalDate: dateStr,
+                alternateDate,
+                meals
+            };
+
+            // Add skips (meal leaves) for original date
+            for (let meal of meals) {
+                const skipObj = {
+                    id: "skip_" + Date.now() + "_" + meal,
+                    custId,
+                    custName: customer.name,
+                    date: dateStr,
+                    meal
+                };
+                window.skips.push(skipObj);
+                await dbSaveSkip(skipObj);
+            }
+
+            window.alternateDays.push(altObj);
+            await dbSaveAlternate(altObj);
+            
+            // Recalculate customer end date
+            customer.end = recalculateCustomerEndDate(customer);
+            await dbSaveCustomer(customer);
+            
+            showToast("மாற்று நாள் பதிவு செய்யப்பட்டது!");
+        } else {
+            // Full leave / Extend End Date
+            for (let meal of meals) {
+                const skipObj = {
+                    id: "skip_" + Date.now() + "_" + meal,
+                    custId,
+                    custName: customer.name,
+                    date: dateStr,
+                    meal
+                };
+                window.skips.push(skipObj);
+                await dbSaveSkip(skipObj);
+            }
+
+            // Save standard day leave if all customer active meals are checked
+            const hasAllSelectedMeals = (customer.breakfast === document.getElementById('planner-leave-b').checked) &&
+                                       (customer.lunch === document.getElementById('planner-leave-l').checked) &&
+                                       (customer.dinner === document.getElementById('planner-leave-d').checked);
+
+            if (hasAllSelectedMeals) {
+                const leaveObj = {
+                    id: "leave_" + Date.now(),
+                    custId,
+                    custName: customer.name,
+                    date: dateStr + " (1 days)",
+                    extendDate: ""
+                };
+                window.leaves.push(leaveObj);
+                await dbSaveLeave(leaveObj);
+            }
+
+            customer.end = recalculateCustomerEndDate(customer);
+            await dbSaveCustomer(customer);
+            showToast("லீவ் பதிவு செய்யப்பட்டது!");
+        }
+
+        window.saveAllToLocalStorageBackup();
+        window.closePlannerLeaveModal();
+        window.renderAll();
+    } catch (err) {
+        console.error("Save planner leave error:", err);
+        showToast("லீவ் பதிவு செய்ய முடியவில்லை!", "error");
+    } finally {
+        if (btn) {
+            btn.disabled = false;
+            btn.innerText = "சேமி / Save";
+        }
+    }
+};
+
+// --- Planner Bulk Actions ---
+window.updateSelectedCount = function() {
+    const checkboxes = document.querySelectorAll('.planner-card-checkbox:checked');
+    const selectedCountSpan = document.getElementById('planner-selected-count');
+    if (selectedCountSpan) {
+        selectedCountSpan.innerText = `${checkboxes.length} Selected`;
+    }
+};
+
+window.applyBulkStaffAssign = async function() {
+    const staffId = document.getElementById('bulk-staff-assign').value;
+    if (!staffId) {
+        showToast("ஊழியரை தேர்வு செய்க!", "alert");
+        return;
+    }
+
+    const checkboxes = document.querySelectorAll('.planner-card-checkbox:checked');
+    if (checkboxes.length === 0) {
+        showToast("வாடிக்கையாளர்கள் யாரையும் தேர்வு செய்யவில்லை!", "alert");
+        return;
+    }
+
+    let updatedCount = 0;
+    for (let cb of checkboxes) {
+        const custId = cb.getAttribute('data-cust-id');
+        const c = window.customers.find(item => item.id === custId);
+        if (c) {
+            c.staffId = staffId;
+            try {
+                await dbSaveCustomer(c);
+                updatedCount++;
+            } catch (e) {
+                console.error("Bulk assign error for:", c.name, e);
+            }
+        }
+    }
+
+    showToast(`${updatedCount} வாடிக்கையாளர்களுக்கு ஊழியர் ஒதுக்கப்பட்டார்!`);
+    window.saveAllToLocalStorageBackup();
+    window.renderAll();
+};
+
+window.applyBulkMenuNotes = async function() {
+    const notes = document.getElementById('bulk-menu-notes').value;
+    const checkboxes = document.querySelectorAll('.planner-card-checkbox:checked');
+    if (checkboxes.length === 0) {
+        showToast("வாடிக்கையாளர்கள் யாரையும் தேர்வு செய்யவில்லை!", "alert");
+        return;
+    }
+
+    let updatedCount = 0;
+    for (let cb of checkboxes) {
+        const custId = cb.getAttribute('data-cust-id');
+        const c = window.customers.find(item => item.id === custId);
+        if (c) {
+            c.notes = notes;
+            try {
+                await dbSaveCustomer(c);
+                updatedCount++;
+            } catch (e) {
+                console.error("Bulk notes error for:", c.name, e);
+            }
+        }
+    }
+
+    showToast(`${updatedCount} வாடிக்கையாளர்களுக்கு நோட்ஸ் சேமிக்கப்பட்டது!`);
+    window.saveAllToLocalStorageBackup();
+    window.renderAll();
 };
 
 // 6. Renders Accounting Period Tabs & Cycle Summary
@@ -370,13 +750,9 @@ function renderAccountsMonthTabs() {
     window.customers.forEach(c => { if(c.start) monthsSet.add(c.start.substring(0, 7)); });
     window.expenses.forEach(e => { if(e.date) monthsSet.add(e.date.substring(0, 7)); });
 
-    // Convert to sorted array reverse chronologically
     const sortedMonths = Array.from(monthsSet).sort((a,b) => b.localeCompare(a));
     
-    // Add cumulative option
-    const periods = ['cumulative', ...sortedMonths];
-    
-    periods.forEach(p => {
+    sortedMonths.forEach(p => {
         const btn = document.createElement('button');
         btn.onclick = () => toggleAccountingCycle(p);
         btn.id = `tab-period-${p}`;
@@ -385,7 +761,7 @@ function renderAccountsMonthTabs() {
             'bg-emerald-600 text-white border-emerald-600 shadow' : 
             'bg-white text-slate-500 hover:bg-slate-50 border-slate-200'
         }`;
-        btn.innerText = p === 'cumulative' ? 'Cumulative / அனைத்தும்' : formatMonthName(p);
+        btn.innerText = formatMonthName(p);
         tabsContainer.appendChild(btn);
     });
 }
@@ -393,6 +769,19 @@ function renderAccountsMonthTabs() {
 function toggleAccountingCycle(period) {
     window.selectedAccountingPeriod = period;
     
+    // Update quick buttons classes
+    const quickPeriods = ['cumulative', 'week', 'month', 'year'];
+    quickPeriods.forEach(p => {
+        const btn = document.getElementById(`tab-period-${p}`);
+        if (btn) {
+            if (p === period) {
+                btn.className = "px-3.5 py-1.5 text-[10px] font-bold rounded-lg border transition-all bg-emerald-600 text-white border-emerald-600 shadow";
+            } else {
+                btn.className = "px-3.5 py-1.5 text-[10px] font-bold rounded-lg border transition-all bg-white text-slate-500 hover:bg-slate-50 border-slate-200";
+            }
+        }
+    });
+
     // Update active styling of month tabs
     const tabsContainer = document.getElementById('accounting-month-tabs');
     if (tabsContainer) {
@@ -413,25 +802,36 @@ function toggleAccountingCycle(period) {
 
     // Filter customers whose start matches the period
     window.customers.forEach(c => {
+        if (!c.start) return;
+        let match = false;
         if (period === 'cumulative') {
-            earnings += (parseFloat(c.paid) || 0);
-        } else if (c.start && c.start.startsWith(period)) {
+            match = true;
+        } else if (period === 'week') {
+            match = isThisWeek(c.start);
+        } else if (period === 'month') {
+            match = c.start.startsWith(new Date().toISOString().slice(0, 7));
+        } else if (period === 'year') {
+            match = c.start.startsWith(new Date().getFullYear().toString());
+        } else {
+            match = c.start.startsWith(period);
+        }
+        
+        if (match) {
             earnings += (parseFloat(c.paid) || 0);
         }
     });
 
     // Filter expenses matching the period
     const filteredExpenses = window.expenses.filter(e => {
-        if (period === 'cumulative') {
-            expenditures += (parseFloat(e.amount) || 0);
-            return true;
-        } else if (e.date && e.date.startsWith(period)) {
-            expenditures += (parseFloat(e.amount) || 0);
-            return true;
-        }
-        return false;
+        if (!e.date) return false;
+        if (period === 'cumulative') return true;
+        if (period === 'week') return isThisWeek(e.date);
+        if (period === 'month') return e.date.startsWith(new Date().toISOString().slice(0, 7));
+        if (period === 'year') return e.date.startsWith(new Date().getFullYear().toString());
+        return e.date.startsWith(period);
     });
 
+    expenditures = filteredExpenses.reduce((acc, ex) => acc + (parseFloat(ex.amount) || 0), 0);
     const netProfit = earnings - expenditures;
 
     // Update Console Labels
@@ -441,7 +841,6 @@ function toggleAccountingCycle(period) {
     const profitEl = document.getElementById('acc-lbl-profit');
     profitEl.innerText = `₹${netProfit.toLocaleString('en-IN')}`;
     
-    // Custom color for profit or loss
     if (netProfit >= 0) {
         profitEl.className = "text-xl font-bold text-sky-800";
     } else {
@@ -457,7 +856,6 @@ function toggleAccountingCycle(period) {
             return;
         }
         
-        // Sort expenses reverse chronologically
         const sortedExpenses = [...filteredExpenses].sort((a,b) => b.date.localeCompare(a.date));
 
         sortedExpenses.forEach(ex => {
@@ -645,6 +1043,9 @@ function openExpensesSummaryModal() {
 
 // 9. Coordinate all rendering methods
 function renderAll() {
+    if (typeof window.applyGlobalSettings === 'function') {
+        window.applyGlobalSettings();
+    }
     renderSummary();
     renderCustomerCards();
     renderLeaveView();
@@ -1084,6 +1485,135 @@ window.saveExcelSkipCell = async function(id, field, value) {
         showToast("விடுப்பு சேமிப்பில் தோல்வி!", "error");
     } finally {
         toggleSavingLabel(false);
+    }
+};
+
+
+// --- Settings View Actions & UI Engine ---
+window.applyGlobalSettings = function() {
+    const biz = window.appSettings || {};
+    
+    // Update Header Business Name & Subtitle/Slogan
+    const h1 = document.getElementById('header-biz-name');
+    if (h1) h1.innerText = (biz.bizName || "Healthy Home's Foods").toUpperCase();
+    
+    const sub = document.getElementById('lbl-subtitle');
+    if (sub) sub.innerText = biz.bizSubtitle || "மந்த்லி கணக்கு மற்றும் டியூ டிராக்கர்";
+
+    // Set prices/costs in Add Customer form inputs placeholders or values
+    const costInput = document.getElementById('cust-cost');
+    const paidInput = document.getElementById('cust-paid');
+    
+    if (costInput && !costInput.value) {
+        costInput.placeholder = `E.g. Monthly: ₹${biz.priceMonthly || 5800} / Trial: ₹${biz.priceTrial || 1200}`;
+    }
+};
+
+window.renderSettingsView = function() {
+    const biz = window.appSettings || {};
+    
+    // Fill the inputs in Settings Form
+    const setBizName = document.getElementById('set-biz-name');
+    if (setBizName) setBizName.value = biz.bizName || '';
+
+    const setBizSubtitle = document.getElementById('set-biz-subtitle');
+    if (setBizSubtitle) setBizSubtitle.value = biz.bizSubtitle || '';
+
+    const setGpayNumber = document.getElementById('set-gpay-number');
+    if (setGpayNumber) setGpayNumber.value = biz.gpayNumber || '';
+
+    const setGpayName = document.getElementById('set-gpay-name');
+    if (setGpayName) setGpayName.value = biz.gpayName || '';
+
+    const setPriceMonthly = document.getElementById('set-price-monthly');
+    if (setPriceMonthly) setPriceMonthly.value = biz.priceMonthly || 0;
+
+    const setPriceTrial = document.getElementById('set-price-trial');
+    if (setPriceTrial) setPriceTrial.value = biz.priceTrial || 0;
+
+    const setDeductMonthly = document.getElementById('set-deduct-monthly');
+    if (setDeductMonthly) setDeductMonthly.value = biz.deductMonthly || 0;
+
+    const setDeductTrial = document.getElementById('set-deduct-trial');
+    if (setDeductTrial) setDeductTrial.value = biz.deductTrial || 0;
+
+    const setWhatsappTemplate = document.getElementById('set-whatsapp-template');
+    if (setWhatsappTemplate) setWhatsappTemplate.value = biz.whatsappTemplate || '';
+
+    const setAdminPassword = document.getElementById('set-admin-password');
+    if (setAdminPassword) setAdminPassword.value = biz.adminPassword || '';
+};
+
+window.saveAppSettingsForm = async function(e) {
+    e.preventDefault();
+    
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin mr-1.5"></i> Saving...`;
+    }
+
+    const updated = {
+        bizName: document.getElementById('set-biz-name').value,
+        bizSubtitle: document.getElementById('set-biz-subtitle').value,
+        gpayNumber: document.getElementById('set-gpay-number').value,
+        gpayName: document.getElementById('set-gpay-name').value,
+        priceMonthly: parseFloat(document.getElementById('set-price-monthly').value) || 5800,
+        priceTrial: parseFloat(document.getElementById('set-price-trial').value) || 1200,
+        deductMonthly: parseFloat(document.getElementById('set-deduct-monthly').value) || 220,
+        deductTrial: parseFloat(document.getElementById('set-deduct-trial').value) || 200,
+        whatsappTemplate: document.getElementById('set-whatsapp-template').value,
+        adminPassword: document.getElementById('set-admin-password').value
+    };
+
+    try {
+        await dbSaveSettings(updated);
+        window.appSettings = updated;
+        localStorage.setItem('hh_settings_enterprise_v8', JSON.stringify(updated));
+        
+        showToast("அமைப்புகள் வெற்றிகரமாக சேமிக்கப்பட்டன!");
+        applyGlobalSettings();
+        
+        // Go back to customers view
+        switchView('customers');
+    } catch (err) {
+        console.error("Save settings form error:", err);
+        showToast("அமைப்புகள் சேமிக்க முடியவில்லை!", "error");
+    } finally {
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `<i class="fa-solid fa-check text-xs mr-1.5"></i> Save Settings / சேமிக்கவும்`;
+        }
+    }
+};
+
+window.resetAppSettingsDefaults = function() {
+    if (confirm("அனைத்து அமைப்புகளையும் அவற்றின் அசல் மதிப்புகளுக்கு மீட்டமைக்க விரும்புகிறீர்களா?")) {
+        const defaults = {
+            bizName: "Healthy Home's Foods",
+            bizSubtitle: "மந்த்லி கணக்கு மற்றும் டியூ டிராக்கர்",
+            gpayNumber: "7868888625",
+            gpayName: "Rajarajeshwari",
+            priceMonthly: 5800,
+            priceTrial: 1200,
+            deductMonthly: 220,
+            deductTrial: 200,
+            whatsappTemplate: "வணக்கம் {name}, உங்களின் நிலுவைத் தொகை ₹{balance} ஆகும். நன்றி!",
+            adminPassword: "1234"
+        };
+        
+        document.getElementById('set-biz-name').value = defaults.bizName;
+        document.getElementById('set-biz-subtitle').value = defaults.bizSubtitle;
+        document.getElementById('set-gpay-number').value = defaults.gpayNumber;
+        document.getElementById('set-gpay-name').value = defaults.gpayName;
+        document.getElementById('set-price-monthly').value = defaults.priceMonthly;
+        document.getElementById('set-price-trial').value = defaults.priceTrial;
+        document.getElementById('set-deduct-monthly').value = defaults.deductMonthly;
+        document.getElementById('set-deduct-trial').value = defaults.deductTrial;
+        document.getElementById('set-whatsapp-template').value = defaults.whatsappTemplate;
+        document.getElementById('set-admin-password').value = defaults.adminPassword;
+        
+        showToast("இயல்பு அமைப்புகள் நிரப்பப்பட்டன. சேமிக்கவும்!");
     }
 };
 

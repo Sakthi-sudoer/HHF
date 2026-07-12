@@ -33,6 +33,7 @@ const KEY_MENU = 'hh_menu_enterprise_v8';
 const KEY_EXP = 'hh_exp_enterprise_v8';
 const KEY_STAFF = 'hh_staff_enterprise_v8';
 const KEY_SKIPS = 'hh_skips_enterprise_v8';
+const KEY_ALTS = 'hh_alts_enterprise_v8';
 
 // Initialize global state arrays from Cache or empty if not yet loaded
 window.customers = JSON.parse(localStorage.getItem(KEY_CUST) || '[]');
@@ -41,6 +42,22 @@ window.menuPlan = JSON.parse(localStorage.getItem(KEY_MENU) || '[]');
 window.expenses = JSON.parse(localStorage.getItem(KEY_EXP) || '[]');
 window.staffList = JSON.parse(localStorage.getItem(KEY_STAFF) || '[]');
 window.skips = JSON.parse(localStorage.getItem(KEY_SKIPS) || '[]');
+window.alternateDays = JSON.parse(localStorage.getItem(KEY_ALTS) || '[]');
+
+const KEY_SETTINGS = 'hh_settings_enterprise_v8';
+const defaultSettings = {
+    bizName: "Healthy Home's Foods",
+    bizSubtitle: "மந்த்லி கணக்கு மற்றும் டியூ டிராக்கர்",
+    gpayNumber: "7868888625",
+    gpayName: "Rajarajeshwari",
+    priceMonthly: 5800,
+    priceTrial: 1200,
+    deductMonthly: 220,
+    deductTrial: 200,
+    whatsappTemplate: "வணக்கம் {name}, உங்களின் நிலுவைத் தொகை ₹{balance} ஆகும். நன்றி!",
+    adminPassword: "1234"
+};
+window.appSettings = JSON.parse(localStorage.getItem(KEY_SETTINGS)) || {...defaultSettings};
 
 // Today's Date representation (calculated dynamically on page load in app.js)
 window.todayDateStr = new Date().toLocaleDateString('sv').substring(0, 10); // YYYY-MM-DD
@@ -75,6 +92,7 @@ function saveAllToLocalStorageBackup() {
     localStorage.setItem(KEY_EXP, JSON.stringify(window.expenses));
     localStorage.setItem(KEY_STAFF, JSON.stringify(window.staffList));
     localStorage.setItem(KEY_SKIPS, JSON.stringify(window.skips));
+    localStorage.setItem(KEY_ALTS, JSON.stringify(window.alternateDays));
     localStorage.setItem('hh_deliveries_v8_' + window.todayDateStr, JSON.stringify(window.deliveryStatus));
 }
 
@@ -141,6 +159,30 @@ function initRealtimeSync() {
         console.log("Firestore sync: Skips list updated", list.length);
         requestUIRefresh();
     }, error => console.error("Skips Sync Error:", error));
+
+    // Alternates Listener
+    db.collection("alternates").onSnapshot(snapshot => {
+        const list = [];
+        snapshot.forEach(doc => list.push(doc.data()));
+        window.alternateDays = list;
+        localStorage.setItem(KEY_ALTS, JSON.stringify(list));
+        console.log("Firestore sync: Alternates list updated", list.length);
+        requestUIRefresh();
+    }, error => console.error("Alternates Sync Error:", error));
+
+    // Settings Listener
+    db.collection("settings").doc("general").onSnapshot(doc => {
+        if (doc.exists) {
+            window.appSettings = { ...defaultSettings, ...doc.data() };
+            localStorage.setItem(KEY_SETTINGS, JSON.stringify(window.appSettings));
+            console.log("Firestore sync: Settings updated");
+            if (typeof applyGlobalSettings === 'function') {
+                applyGlobalSettings();
+            }
+        } else {
+            db.collection("settings").doc("general").set(window.appSettings);
+        }
+    }, error => console.error("Settings Sync Error:", error));
 }
 
 // 4. Asynchronous Database CRUD Write Methods
@@ -250,6 +292,36 @@ async function dbDeleteSkip(id) {
         return true;
     } catch (error) {
         console.error("Delete skip error:", error);
+        throw error;
+    }
+}
+
+async function dbSaveAlternate(altObj) {
+    try {
+        await db.collection("alternates").doc(altObj.id).set(altObj);
+        return true;
+    } catch (error) {
+        console.error("Save alternate error:", error);
+        throw error;
+    }
+}
+
+async function dbDeleteAlternate(id) {
+    try {
+        await db.collection("alternates").doc(id).delete();
+        return true;
+    } catch (error) {
+        console.error("Delete alternate error:", error);
+        throw error;
+    }
+}
+
+async function dbSaveSettings(settingsObj) {
+    try {
+        await db.collection("settings").doc("general").set(settingsObj);
+        return true;
+    } catch (error) {
+        console.error("Save settings error:", error);
         throw error;
     }
 }

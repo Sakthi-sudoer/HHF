@@ -68,6 +68,68 @@ function isMealSkipped(custId, dateStr, meal) {
     return window.skips.some(s => s.custId === custId && s.date === dateStr && s.meal === meal);
 }
 
+// 3c. Check if customer has a meal-specific leave/skip or full leave
+function isCustomerOnLeaveForMeal(custId, dateStr, meal) {
+    return isCustomerOnLeave(custId, dateStr) || isMealSkipped(custId, dateStr, meal);
+}
+
+// 3d. Check if customer has an alternate day meal scheduled for a specific date
+function isAlternateMealScheduled(custId, dateStr, meal) {
+    if (!window.alternateDays) return false;
+    return window.alternateDays.some(a => a.custId === custId && a.alternateDate === dateStr && a.meals.includes(meal));
+}
+
+// 3e. Check if a leave/skip date has been compensated by an alternate date
+function isLeaveCompensated(custId, originalDateStr) {
+    if (!window.alternateDays) return false;
+    return window.alternateDays.some(a => a.custId === custId && a.originalDate === originalDateStr);
+}
+
+// 3f. Query Firestore to check if the customer was missed yesterday (active but no delivery marked)
+async function wasCustomerMissedYesterday(custId) {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().slice(0, 10);
+    const isSun = yesterday.getDay() === 0;
+    if (isSun) return false;
+
+    const c = window.customers.find(item => item.id === custId);
+    if (!c || !c.start || !c.end) return false;
+
+    const start = new Date(c.start);
+    const end = new Date(c.end);
+    const yDate = new Date(yesterdayStr);
+
+    if (yDate >= start && yDate <= end) {
+        if (isCustomerOnLeave(custId, yesterdayStr)) return false;
+
+        const hasB = c.breakfast && !isMealSkipped(custId, yesterdayStr, 'breakfast');
+        const hasL = c.lunch && !isMealSkipped(custId, yesterdayStr, 'lunch');
+        const hasD = c.dinner && !isMealSkipped(custId, yesterdayStr, 'dinner');
+
+        if (hasB || hasL || hasD) {
+            try {
+                const doc = await db.collection("deliveries").doc(yesterdayStr).get();
+                if (doc.exists) {
+                    const data = doc.data() || {};
+                    const custDelivery = data[custId] || {};
+                    const checkedB = c.breakfast && custDelivery.breakfast;
+                    const checkedL = c.lunch && custDelivery.lunch;
+                    const checkedD = c.dinner && custDelivery.dinner;
+
+                    const checkedCount = (checkedB ? 1 : 0) + (checkedL ? 1 : 0) + (checkedD ? 1 : 0);
+                    return checkedCount === 0;
+                } else {
+                    return true;
+                }
+            } catch (e) {
+                console.error("Error checking yesterday's deliveries:", e);
+            }
+        }
+    }
+    return false;
+}
+
 // 4. Calculate leave extension date (skipping Sundays and other leaves dynamically)
 function calculateContinuousLeaveExtension() {
     const custId = document.getElementById('leave-cust-id').value;
@@ -141,7 +203,13 @@ function recalculateCustomerEndDate(c) {
             return l.date.startsWith(dateStr);
         });
 
-        if (!isSun && !onLeave) {
+        // Check if there are any skips on this day (meal-level leaves)
+        const hasSkips = window.skips && window.skips.some(s => s.custId === c.id && s.date === dateStr);
+
+        // If the day is a leave or has skips, check if it's compensated by an alternate day
+        const compensated = isLeaveCompensated(c.id, dateStr);
+
+        if (!isSun && (!onLeave || compensated)) {
             deliveryDaysCount++;
         }
         
@@ -163,8 +231,8 @@ function printMemoBill(id) {
         return acc + (dMatch ? parseInt(dMatch[1]) : 1);
     }, 0);
 
-    const basePlanCost = c.cost || 0;
-    const deductionPerDay = c.isTrial ? 200 : 220;
+        const basePlanCost = c.cost || 0;
+    const deductionPerDay = c.isTrial ? (parseFloat(window.appSettings.deductTrial) || 200) : (parseFloat(window.appSettings.deductMonthly) || 220);
     const totalDeductions = totalLeaveDays * deductionPerDay;
     const subtotalDue = Math.max(0, basePlanCost - totalDeductions);
     const balanceDue = Math.max(0, subtotalDue - c.paid);
@@ -198,7 +266,7 @@ function printMemoBill(id) {
         </head>
         <body onload="window.print(); window.close();">
             <div class="header">
-                <h1>HEALTHY HOME'S FOODS</h1>
+                <h1>${(window.appSettings.bizName || "HEALTHY HOME'S FOODS").toUpperCase()}</h1>
                 <p>Premium Catering & Tiffin Service • கோவை (Coimbatore)</p>
                 <p style="font-weight: bold; font-size: 15px; color: #059669; margin-top: 8px;">MEMO BILL / INVOICE</p>
             </div>
@@ -253,13 +321,13 @@ function printMemoBill(id) {
 
             <div class="payment-info">
                 <h3>Payment Methods</h3>
-                <p><strong>GPay Number:</strong> 7868888625</p>
-                <p><strong>Name:</strong> Rajarajeshwari</p>
+                <p><strong>GPay Number:</strong> ${window.appSettings.gpayNumber || "7868888625"}</p>
+                <p><strong>Name:</strong> ${window.appSettings.gpayName || "Rajarajeshwari"}</p>
                 <p style="font-size: 12px; color: #64748b; margin-top: 10px;">Please share a screenshot of the payment on WhatsApp after making the transfer.</p>
             </div>
 
             <div class="footer">
-                <p>Thank you for choosing Healthy Home's Foods! Clean. Hygienic. Healthy.</p>
+                <p>Thank you for choosing ${window.appSettings.bizName || "Healthy Home's Foods"}! Clean. Hygienic. Healthy.</p>
             </div>
         </body>
         </html>
@@ -279,7 +347,7 @@ function downloadCustomerLedger(id) {
     }, 0);
 
     const basePlanCost = c.cost || 0;
-    const deductionPerDay = c.isTrial ? 200 : 220;
+    const deductionPerDay = c.isTrial ? (parseFloat(window.appSettings.deductTrial) || 200) : (parseFloat(window.appSettings.deductMonthly) || 220);
     const totalDeductions = totalLeaveDays * deductionPerDay;
     const subtotalDue = Math.max(0, basePlanCost - totalDeductions);
     const balanceDue = Math.max(0, subtotalDue - c.paid);
@@ -314,7 +382,7 @@ function downloadCustomerLedger(id) {
         </head>
         <body onload="window.print(); window.close();">
             <div class="header">
-                <h1>HEALTHY HOME'S FOODS</h1>
+                <h1>${(window.appSettings.bizName || "HEALTHY HOME'S FOODS").toUpperCase()}</h1>
                 <p>Catering Dashboard & Customer Accounts Portal</p>
                 <p style="font-weight: bold; font-size: 15px; color: #0284c7; margin-top: 8px;">CUSTOMER ACCOUNT LEDGER STATEMENT</p>
             </div>
@@ -358,7 +426,7 @@ function downloadCustomerLedger(id) {
                         <td style="text-align: right;">${basePlanCost.toFixed(2)}</td>
                     </tr>
                     <tr>
-                        <td>Adjustments (Leaves Deductions: ${totalLeaveDays} Days @ ${c.isTrial ? '₹200' : '₹220'}/day)</td>
+                        <td>Adjustments (Leaves Deductions: ${totalLeaveDays} Days @ ₹${c.isTrial ? (window.appSettings.deductTrial || 200) : (window.appSettings.deductMonthly || 220)}/day)</td>
                         <td style="text-align: right; color: #ef4444;">- ${totalDeductions.toFixed(2)}</td>
                     </tr>
                     <tr class="total-row">
@@ -398,8 +466,8 @@ function downloadCustomerLedger(id) {
             }
 
             <div class="footer">
-                <p>Generates dynamically from Healthy Home's Foods Cloud Sync System.</p>
-                <p>© ${new Date().getFullYear()} Healthy Home's Foods. All rights reserved.</p>
+                <p>Generates dynamically from ${(window.appSettings.bizName || "Healthy Home's Foods")} Cloud Sync System.</p>
+                <p>© ${new Date().getFullYear()} ${(window.appSettings.bizName || "Healthy Home's Foods")}. All rights reserved.</p>
             </div>
         </body>
         </html>
@@ -475,7 +543,7 @@ function printDeliveryChecklist() {
         <body onload="window.print(); window.close();">
             <div class="header">
                 <div>
-                    <h1>HEALTHY HOME'S FOODS - DAILY SHEET</h1>
+                    <h1>${(window.appSettings.bizName || "HEALTHY HOME'S FOODS").toUpperCase()} - DAILY SHEET</h1>
                     <p>விநியோகப் பட்டியல் (Grouped by Delivery Driver)</p>
                 </div>
                 <div style="text-align: right;">

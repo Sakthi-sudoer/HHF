@@ -3,7 +3,8 @@
 
 $port = 8080
 $listener = New-Object System.Net.HttpListener
-$listener.Prefixes.Add("http://+:$port/")
+$listener.Prefixes.Add("http://localhost:$port/")
+$listener.Prefixes.Add("http://127.0.0.1:$port/")
 
 # Get Local IP Address
 $ip = (Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.IPAddress -notlike "127.*" -and $_.IPAddress -notlike "169.254.*" } | Select-Object { $_.IPAddress } | Select-Object -First 1).IPAddress
@@ -13,7 +14,7 @@ Write-Host "🚀 LOCAL DASHBOARD WEB SERVER IS RUNNING!" -ForegroundColor Green
 Write-Host "==================================================" -ForegroundColor Green
 Write-Host "• On your PC:      http://localhost:$port/" -ForegroundColor Cyan
 if ($ip) {
-    Write-Host "• On your Android:  http://$ip:$port/" -ForegroundColor Cyan
+    Write-Host "• On your Android:  http://$($ip):$port/" -ForegroundColor Cyan
     Write-Host "  (Ensure your phone and PC are on the same Wi-Fi network)" -ForegroundColor DarkGray
 }
 Write-Host "• To stop server:   Press Ctrl+C" -ForegroundColor Yellow
