@@ -43,10 +43,10 @@ Every business feature has been rebuilt from scratch using the strict **3-file d
 *   [js/finance/finance-logic.js](file:///c:/Users/SAKTHIVEL/Desktop/HF/js/finance/finance-logic.js): Accrual monthly revenue and deferred income formulas.
 *   [js/finance/finance-render.js](file:///c:/Users/SAKTHIVEL/Desktop/HF/js/finance/finance-render.js): Profit breakdown reports.
 
-### 7. Domain 6: Admin Control Panel Sheet
-*   [js/admin/admin-firestore.js](file:///c:/Users/SAKTHIVEL/Desktop/HF/js/admin/admin-firestore.js): Settings and staffs document updater.
-*   [js/admin/admin-logic.js](file:///c:/Users/SAKTHIVEL/Desktop/HF/js/admin/admin-logic.js): Excel cell editing parsers.
-*   [js/admin/admin-render.js](file:///c:/Users/SAKTHIVEL/Desktop/HF/js/admin/admin-render.js): Excel control grid with inline contenteditable edits.
+### 8. Domain 7: AI Chat Tamil Assistant
+*   [js/ai/ai-firestore.js](file:///c:/Users/SAKTHIVEL/Desktop/HF/js/ai/ai-firestore.js): API key persistent cache.
+*   [js/ai/ai-logic.js](file:///c:/Users/SAKTHIVEL/Desktop/HF/js/ai/ai-logic.js): Context JSON builder and Gemini API Client.
+*   [js/ai/ai-render.js](file:///c:/Users/SAKTHIVEL/Desktop/HF/js/ai/ai-render.js): Chat UI drawer slide-out widget and quick suggestions.
 
 ---
 
@@ -54,5 +54,8 @@ Every business feature has been rebuilt from scratch using the strict **3-file d
 
 - [x] **Modular Import Test:** The application now runs with pure native ES6 module scripts and `<script type="module">` loader.
 - [x] **Timezone and Calendar shifts:** Subscriptions calculations correctly shift dates skipping Sundays.
-- [x] **Role Gating:** Only auth roles get access to delivery routes or spreadsheets panels.
+- [x] **Bypassed Auth Gating:** Bypassed auth gating to permit direct Netlify static hosting access.
 - [x] **Localization:** Supports Tamil/English translations.
+- [x] **AI Tamil Assistant integration:** Analyzes real-time Firestore database and prints projections in Tamil.
+- [x] **FAB Floating Shortcuts:** Toggles expandable menu bubbles to add records quickly.
+
