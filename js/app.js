@@ -109,6 +109,12 @@ export function switchView(viewId) {
 
   activeTab = viewId;
 
+  // Collapse mobile sidebar navigation when switching view
+  const sidebar = document.getElementById('sidebar-nav');
+  if (sidebar && window.innerWidth < 768) {
+    sidebar.classList.add('-translate-x-full');
+  }
+
   // Toggle view containers
   const views = ['dashboard', 'customers', 'delivery', 'leave', 'kitchen', 'staff', 'expenses', 'profit', 'reports', 'admin', 'settings', 'vehicles', 'finance'];
   views.forEach(v => {
@@ -119,14 +125,14 @@ export function switchView(viewId) {
   const activeEl = document.getElementById('view-' + viewId);
   if (activeEl) activeEl.classList.remove('hidden');
 
-  // Toggle CSS highlight class on tabs
+  // Toggle CSS highlight class on sidebar navigation tabs
   views.forEach(tName => {
     const tabEl = document.getElementById(`d-tab-${tName}`);
     if (tabEl) {
       if (tName === viewId) {
-        tabEl.className = "flex-1 py-2.5 text-center text-xs font-bold rounded-lg bg-emerald-600 text-white shadow";
+        tabEl.className = "w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 text-white shadow";
       } else {
-        tabEl.className = "flex-1 py-2.5 text-center text-xs font-bold rounded-lg text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all";
+        tabEl.className = "w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all";
       }
     }
   });
@@ -134,6 +140,21 @@ export function switchView(viewId) {
   // Re-run screen renders
   renderAll();
 }
+
+/**
+ * Mobile Sidebar toggler
+ */
+export function toggleSidebar() {
+  const sidebar = document.getElementById('sidebar-nav');
+  if (sidebar) {
+    if (sidebar.classList.contains('-translate-x-full')) {
+      sidebar.classList.remove('-translate-x-full');
+    } else {
+      sidebar.classList.add('-translate-x-full');
+    }
+  }
+}
+
 
 /**
  * Boots the design variables into CSS variables in document root
@@ -341,8 +362,10 @@ function updateRoleBasedInterface(role) {
 // Global exposure
 window.appCore = {
   switchView,
-  logout: logoutUser
+  logout: logoutUser,
+  toggleSidebar
 };
+
 
 // 🌟 FLOATING ACTION BUTTON (FAB) SHORTCUTS IMPLEMENTATION
 export function toggleFabMenu() {
