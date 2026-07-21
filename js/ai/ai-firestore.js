@@ -1,6 +1,8 @@
 // 🌟 AI CHAT ASSISTANT FIRESTORE & STORAGE ADAPTER
 // Manages the Gemini API developer key.
 
+import { dataRegistry } from "../core/accessors.js";
+
 const KEY_NAME = 'hh_gemini_api_key';
 
 /**
@@ -8,6 +10,8 @@ const KEY_NAME = 'hh_gemini_api_key';
  * @returns {string}
  */
 export function getGeminiAPIKey() {
+  const dbKey = dataRegistry.getSettings()?.geminiApiKey;
+  if (dbKey) return dbKey.trim();
   return localStorage.getItem(KEY_NAME) || '';
 }
 

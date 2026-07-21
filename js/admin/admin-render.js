@@ -270,6 +270,9 @@ export function renderSettingsView() {
   if (portionDalEl) portionDalEl.value = settings.portionDal || 80;
   if (portionVegEl) portionVegEl.value = settings.portionVeg || 120;
   if (portionOilEl) portionOilEl.value = settings.portionOil || 15;
+
+  const geminiKeyEl = document.getElementById('set-gemini-key');
+  if (geminiKeyEl) geminiKeyEl.value = settings.geminiApiKey || '';
 }
 
 /**
@@ -297,7 +300,8 @@ export async function saveAppSettingsForm(e) {
     portionRice: parseFloat(document.getElementById('set-portion-rice').value) || 250,
     portionDal: parseFloat(document.getElementById('set-portion-dal').value) || 80,
     portionVeg: parseFloat(document.getElementById('set-portion-veg').value) || 120,
-    portionOil: parseFloat(document.getElementById('set-portion-oil').value) || 15
+    portionOil: parseFloat(document.getElementById('set-portion-oil').value) || 15,
+    geminiApiKey: (document.getElementById('set-gemini-key')?.value || '').trim()
   };
 
   try {

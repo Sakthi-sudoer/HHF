@@ -3,6 +3,8 @@
 import { getGeminiAPIKey, saveGeminiAPIKey } from "./ai-firestore.js";
 import { queryGeminiAssistant, runGeminiDiagnostics } from "./ai-logic.js";
 import { t } from "../core/i18n.js";
+import { dbSaveSettings } from "../admin/admin-firestore.js";
+import { dataRegistry } from "../core/accessors.js";
 
 let chatHistory = [];
 let isDrawerOpen = false;
@@ -111,11 +113,22 @@ function checkGeminiAPIKeyConfig() {
   }
 }
 
-export function saveKey() {
+export async function saveKey() {
   const input = document.getElementById('ai-api-key-input');
   if (input && input.value.trim()) {
-    saveGeminiAPIKey(input.value);
+    const keyVal = input.value.trim();
+    saveGeminiAPIKey(keyVal);
     checkGeminiAPIKeyConfig();
+    
+    // Backup to Firestore
+    try {
+      const activeSettings = { ...dataRegistry.getSettings() };
+      activeSettings.geminiApiKey = keyVal;
+      await dbSaveSettings(activeSettings);
+    } catch (e) {
+      console.warn("Failed to backup key to firestore settings:", e);
+    }
+    
     alert("Gemini API key saved! Chat enabled.");
   }
 }

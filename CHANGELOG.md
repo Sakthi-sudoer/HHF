@@ -11,6 +11,11 @@ All notable changes to this project will be documented in this file.
 *   **Hover-Retractable Navigation Sidebar:** Created vertical left sidebar menu collapsing to icons-only (`w-16`) on desktop and expanding to text labels (`w-72`) upon hover.
 *   **Sub-view parent tab highlights:** Wired parent highlight mappings in router configuration.
 *   **Gemini API Table rendering:** Added markdown tables parser converting AI chat responses into styled HTML tables with alternating row backgrounds.
+*   **Database Settings Backup:** Configured Settings page to save and retrieve values directly from the Firestore settings/general document.
+*   **Gemini API Key database sync:** Wired saveKey() to backup the user's API key to the global settings document on Firestore, automatically downloading and loading it on startup.
+*   **Persistent page active tab reload:** Integrated localStorage persistence inside switchView() to automatically switch back to the last selected workspace tab upon page refresh.
+*   **Visible Navigation icons:** Removed 'hidden' attributes from the sidebar HTML buttons so that navigation options are fully active and visible instantly on boot.
+
 
 ## [2.0.0] - 2026-07-21
 ### Added

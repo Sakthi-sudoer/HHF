@@ -112,6 +112,7 @@ export function switchView(viewId) {
   }
 
   activeTab = viewId;
+  localStorage.setItem('hh_last_tab', viewId);
 
   // Collapse mobile sidebar navigation when switching view
   const sidebar = document.getElementById('sidebar-nav');
@@ -286,7 +287,8 @@ window.addEventListener('DOMContentLoaded', async () => {
       // Update interface based on role gating
       updateRoleBasedInterface(role);
       
-      switchView('dashboard');
+      const lastTab = localStorage.getItem('hh_last_tab') || 'dashboard';
+      switchView(lastTab);
     }
   });
 

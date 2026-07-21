@@ -55,37 +55,37 @@
       </button>
 
       <!-- Deliveries -->
-      <button id="d-tab-delivery" onclick="window.appCore.switchView('delivery')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all hidden">
+      <button id="d-tab-delivery" onclick="window.appCore.switchView('delivery')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all">
         <i class="fa-solid fa-clipboard-list text-base w-5 text-center flex-shrink-0"></i>
         <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap" data-i18n="nav.delivery">Deliveries</span>
       </button>
 
       <!-- Kitchen -->
-      <button id="d-tab-kitchen" onclick="window.appCore.switchView('kitchen')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all hidden">
+      <button id="d-tab-kitchen" onclick="window.appCore.switchView('kitchen')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all">
         <i class="fa-solid fa-fire-burner text-base w-5 text-center flex-shrink-0"></i>
         <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap" data-i18n="nav.kitchen">Kitchen</span>
       </button>
 
       <!-- Vehicles -->
-      <button id="d-tab-vehicles" onclick="window.appCore.switchView('vehicles')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all hidden">
+      <button id="d-tab-vehicles" onclick="window.appCore.switchView('vehicles')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all">
         <i class="fa-solid fa-motorcycle text-base w-5 text-center flex-shrink-0"></i>
         <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap" data-i18n="nav.vehicles">Vehicles</span>
       </button>
 
       <!-- Customers -->
-      <button id="d-tab-customers" onclick="window.appCore.switchView('customers')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all hidden">
+      <button id="d-tab-customers" onclick="window.appCore.switchView('customers')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all">
         <i class="fa-solid fa-users text-base w-5 text-center flex-shrink-0"></i>
         <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap" data-i18n="nav.customers">Customers</span>
       </button>
 
       <!-- Finance -->
-      <button id="d-tab-finance" onclick="window.appCore.switchView('finance')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all hidden">
+      <button id="d-tab-finance" onclick="window.appCore.switchView('finance')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all">
         <i class="fa-solid fa-wallet text-base w-5 text-center flex-shrink-0"></i>
         <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap" data-i18n="nav.finance">Finance</span>
       </button>
 
       <!-- Control Panel -->
-      <button id="d-tab-admin" onclick="window.appCore.switchView('admin')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all hidden">
+      <button id="d-tab-admin" onclick="window.appCore.switchView('admin')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all">
         <i class="fa-solid fa-table text-base w-5 text-center flex-shrink-0"></i>
         <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap" data-i18n="nav.admin">Control Panel</span>
       </button>
@@ -642,6 +642,10 @@
             <div>
               <label class="block mb-1">Default Oil Portions (ml)</label>
               <input type="number" id="set-portion-oil" required class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-800 rounded-xl focus:outline-none font-bold text-slate-800 dark:text-slate-100">
+            </div>
+            <div class="md:col-span-2">
+              <label class="block mb-1">Gemini Developer API Key (Google AI Studio)</label>
+              <input type="password" id="set-gemini-key" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-800 rounded-xl focus:outline-none font-medium text-slate-800 dark:text-slate-100" placeholder="AIzaSy...">
             </div>
             <div class="md:col-span-2">
               <label class="block mb-1">WhatsApp Templates message</label>
