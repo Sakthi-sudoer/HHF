@@ -87,8 +87,15 @@ export async function queryGeminiAssistant(apiKey, userMessage, chatHistory = []
   }
 
   const dbContext = compileDatabaseContext();
-  const endpoint = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
+  // Self-healing attempts list (endpoints and models)
+  const attempts = [
+    { ver: "v1beta", model: "gemini-1.5-flash" },
+    { ver: "v1", model: "gemini-1.5-flash" },
+    { ver: "v1beta", model: "gemini-1.5-flash-latest" },
+    { ver: "v1beta", model: "gemini-1.5-pro" },
+    { ver: "v1beta", model: "gemini-pro" }
+  ];
 
   const systemInstruction = `
 You are the Official AI Operations & Financial Analyst for "Healthy Home's Foods".
@@ -109,22 +116,21 @@ ${dbContext}
 `;
 
   // Build content request payload including history
-  const contents = [];
-  
-  // Feed system prompt as a user/model boundary context or simple preamble
-  contents.push({
-    role: "user",
-    parts: [{ text: `System Instructions: ${systemInstruction}\n\nUnderstood? Let's start.` }]
-  });
-  contents.push({
-    role: "model",
-    parts: [{ text: "புரிந்தது. நான் 'ஹெல்தி ஹோம்ஸ் ஃபுட்ஸ்' நிறுவனத்தின் நிதி மற்றும் செயல்பாட்டு மேலாண்மை AI உதவியாளராக செயல்படுவேன். உங்களின் கேள்விகளுக்குத் தமிழில் பதிலளிக்கத் தயாராக உள்ளேன். தயவுசெய்து உங்களின் கேள்வியைக் கேளுங்கள்!" }]
-  });
+  const contents = [
+    {
+      role: "user",
+      parts: [{ text: `System Instructions: ${systemInstruction}\n\nUnderstood? Let's start.` }]
+    },
+    {
+      role: "model",
+      parts: [{ text: "புரிந்தது. நான் 'ஹெல்தி ஹோம்ஸ் ஃபுட்ஸ்' நிறுவனத்தின் நிதி மற்றும் செயல்பாட்டு மேலாண்மை AI உதவியாளராக செயல்படுவேன். உங்களின் கேள்விகளுக்குத் தமிழில் பதிலளிக்கத் தயாராக உள்ளேன். தயவுசெய்து உங்களின் கேள்வியைக் கேளுங்கள்!" }]
+    }
+  ];
 
   // Inject previous conversation turns
   chatHistory.forEach(msg => {
     contents.push({
-      role: msg.role, // 'user' or 'model'
+      role: msg.role,
       parts: [{ text: msg.text }]
     });
   });
@@ -135,29 +141,37 @@ ${dbContext}
     parts: [{ text: userMessage }]
   });
 
-  try {
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ contents })
-    });
+  let lastError = null;
 
-    if (!response.ok) {
-      const errData = await response.json();
-      console.error("Gemini API error details", errData);
-      throw new Error(errData.error?.message || "HTTP_ERROR");
-    }
+  for (let attempt of attempts) {
+    const endpoint = `https://generativelanguage.googleapis.com/${attempt.ver}/models/${attempt.model}:generateContent?key=${apiKey}`;
+    
+    try {
+      console.log(`Attempting Gemini API Call: ${attempt.ver} - ${attempt.model}`);
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ contents })
+      });
 
-    const data = await response.json();
-    const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!replyText) {
-      throw new Error("EMPTY_GEMINI_RESPONSE");
+      if (response.ok) {
+        const data = await response.json();
+        const replyText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (replyText) {
+          console.log(`Gemini API connection success: ${attempt.model}`);
+          return replyText;
+        }
+      } else {
+        const errData = await response.json();
+        lastError = new Error(errData.error?.message || `HTTP ${response.status}`);
+      }
+    } catch (err) {
+      lastError = err;
     }
-    return replyText;
-  } catch (error) {
-    console.error("Gemini API call failed", error);
-    throw error;
   }
+
+  throw lastError || new Error("All Google Gemini API model connection attempts failed.");
 }
+
