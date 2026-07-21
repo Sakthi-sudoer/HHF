@@ -1,7 +1,7 @@
 // 🌟 AI CHAT ASSISTANT UI RENDERING ENGINE
 // Dynamically appends the AI chatbot to the page layout and handles interactions.
 import { getGeminiAPIKey, saveGeminiAPIKey } from "./ai-firestore.js";
-import { queryGeminiAssistant } from "./ai-logic.js";
+import { queryGeminiAssistant, runGeminiDiagnostics } from "./ai-logic.js";
 import { t } from "../core/i18n.js";
 
 let chatHistory = [];
@@ -172,7 +172,22 @@ export async function sendMessage() {
   } catch (error) {
     removeLoadingBubble(loaderId);
     console.error("Gemini query failure", error);
-    appendMessage('model', `மன்னிக்கவும், தரவுகளை பகுப்பாய்வு செய்வதில் பிழை ஏற்பட்டது. [Error: ${error.message}]`);
+    
+    try {
+      const diagData = await runGeminiDiagnostics(apiKey);
+      console.warn("Gemini Diagnostics Output:", diagData);
+      
+      if (diagData.error) {
+        appendMessage('model', `மன்னிக்கவும், தரவுகளை பகுப்பாய்வு செய்வதில் பிழை ஏற்பட்டது.<br><br><b>Error Code:</b> [${error.message}]<br><b>Diagnostics API Error:</b> ${diagData.error.message || JSON.stringify(diagData.error)}`);
+      } else if (diagData.models && diagData.models.length > 0) {
+        const list = diagData.models.map(m => m.name.replace('models/', '')).slice(0, 5).join(', ');
+        appendMessage('model', `மன்னிக்கவும், மாடலுடன் இணைப்பதில் சிக்கல் உள்ளது.<br><br><b>Error Code:</b> [${error.message}]<br><b>உங்களுக்கு கிடைக்கக்கூடிய மாடல்களின் பட்டியல் (Available Models):</b> ${list}`);
+      } else {
+        appendMessage('model', `மன்னிக்கவும், தரவுகளை பகுப்பாய்வு செய்வதில் பிழை ஏற்பட்டது.<br><br><b>Error Code:</b> [${error.message}]<br><b>மாடல் பட்டியல் (Diagnostics Output):</b> ${JSON.stringify(diagData)}`);
+      }
+    } catch (diagErr) {
+      appendMessage('model', `மன்னிக்கவும், தரவுகளை பகுப்பாய்வு செய்வதில் பிழை ஏற்பட்டது. [Error: ${error.message}]`);
+    }
   }
 }
 

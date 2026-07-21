@@ -175,3 +175,20 @@ ${dbContext}
   throw lastError || new Error("All Google Gemini API model connection attempts failed.");
 }
 
+/**
+ * Runs diagnostics using Google Model Service
+ * @param {string} apiKey 
+ * @returns {Promise<Object>}
+ */
+export async function runGeminiDiagnostics(apiKey) {
+  const endpoint = `https://generativelanguage.googleapis.com/v1/models?key=${apiKey}`;
+  try {
+    const res = await fetch(endpoint);
+    const data = await res.json();
+    return data;
+  } catch (err) {
+    return { error: err.message };
+  }
+}
+
+
