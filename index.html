@@ -687,7 +687,10 @@
   <div id="customer-modal" class="fixed inset-0 bg-black/60 items-center justify-center z-50 p-4" style="display: none;">
     <div class="bg-white dark:bg-slate-800 rounded-3xl w-full max-w-lg shadow-2xl p-6 text-xs flex flex-col max-h-[90vh] overflow-y-auto scroll-container">
       <div class="flex justify-between items-center border-b dark:border-slate-700 pb-3 mb-4">
-        <h3 id="modal-title" class="font-bold text-sm text-slate-800 dark:text-slate-100">Add Customer</h3>
+        <div class="flex items-center space-x-2">
+          <h3 id="modal-title" class="font-bold text-sm text-slate-800 dark:text-slate-100">Add Customer</h3>
+          <span id="cust-balance" class="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-rose-50 dark:bg-rose-950/20 text-rose-600 dark:text-rose-400">₹0</span>
+        </div>
         <button type="button" onclick="window.appCustomers.closeFormModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
       <form id="customer-form" class="space-y-4">
