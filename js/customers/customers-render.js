@@ -212,6 +212,12 @@ export function openEditForm(id = '') {
     statusEl.value = 'active';
   }
 
+  // Collapse advanced options by default
+  const advSection = document.getElementById('adv-form-section');
+  if (advSection) advSection.classList.add('hidden');
+  const chevron = document.getElementById('adv-chevron');
+  if (chevron) chevron.classList.remove('rotate-180');
+
   document.getElementById('customer-modal').style.display = 'flex';
 }
 
@@ -563,6 +569,20 @@ export function toggleQty(meal) {
   }
 }
 
+export function toggleAdvancedForm() {
+  const section = document.getElementById('adv-form-section');
+  const chevron = document.getElementById('adv-chevron');
+  if (section) {
+    if (section.classList.contains('hidden')) {
+      section.classList.remove('hidden');
+      if (chevron) chevron.classList.add('rotate-180');
+    } else {
+      section.classList.add('hidden');
+      if (chevron) chevron.classList.remove('rotate-180');
+    }
+  }
+}
+
 // Global hookup
 window.appCustomers = {
   render: renderCustomersView,
@@ -577,6 +597,7 @@ window.appCustomers = {
   switchProfileTab,
   triggerProfilePayment,
   deleteLeave,
+  toggleAdvancedForm,
   onRefresh: null
 };
 

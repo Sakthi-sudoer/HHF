@@ -695,25 +695,20 @@
       </div>
       <form id="customer-form" class="space-y-4">
         <input type="hidden" id="edit-id">
+        
+        <!-- Primary Fields -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label class="block font-bold text-slate-400 mb-1" data-i18n="common.name">Name</label>
             <input type="text" id="cust-name" required placeholder="Customer Name" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-800 rounded-xl focus:outline-none font-semibold text-slate-800 dark:text-slate-100">
           </div>
           <div>
-            <label class="block font-bold text-slate-400 mb-1">Company Name</label>
-            <input type="text" id="cust-company" placeholder="Optional Company" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-800 rounded-xl focus:outline-none text-slate-800 dark:text-slate-100">
-          </div>
-          <div>
             <label class="block font-bold text-slate-400 mb-1" data-i18n="common.phone">Phone</label>
             <input type="text" id="cust-phone" required placeholder="Phone Number" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-800 rounded-xl focus:outline-none font-bold text-slate-800 dark:text-slate-100">
           </div>
-          <div>
-            <label class="block font-bold text-slate-400 mb-1">Address</label>
-            <input type="text" id="cust-address" placeholder="Delivery Address" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-800 rounded-xl focus:outline-none text-slate-800 dark:text-slate-100">
-          </div>
         </div>
 
+        <!-- Meals Configuration -->
         <div class="border-t dark:border-slate-700 pt-3">
           <label class="block font-bold text-slate-400 mb-2">Meal Quantities & Schedule</label>
           <div class="grid grid-cols-3 gap-3">
@@ -747,53 +742,71 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 border-t dark:border-slate-700 pt-3">
-          <div>
-            <label class="block font-bold text-slate-400 mb-1">Plan Configuration</label>
-            <select id="cust-plan-type" onchange="window.appCustomers.triggerAutoCalculateEndDate()" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-800 rounded-xl focus:outline-none font-medium">
-              <option value="monthly">Monthly Subscription (26 days)</option>
-              <option value="weekly">Weekly Plan (6 days)</option>
-              <option value="trial">6 Days Trial</option>
-            </select>
+        <!-- Plan Type -->
+        <div class="border-t dark:border-slate-700 pt-3">
+          <label class="block font-bold text-slate-400 mb-1">Plan Configuration</label>
+          <select id="cust-plan-type" onchange="window.appCustomers.triggerAutoCalculateEndDate()" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-800 rounded-xl focus:outline-none font-medium">
+            <option value="monthly">Monthly Subscription (26 days)</option>
+            <option value="weekly">Weekly Plan (6 days)</option>
+            <option value="trial">6 Days Trial</option>
+          </select>
+        </div>
+
+        <!-- Advanced Options Toggle Accordion -->
+        <button type="button" onclick="window.appCustomers.toggleAdvancedForm()" class="w-full text-left py-2 border-t dark:border-slate-700 font-bold text-slate-500 hover:text-slate-400 flex justify-between items-center mt-3 focus:outline-none">
+          <span>கூடுதல் விவரங்கள் (Advanced Settings)</span>
+          <i id="adv-chevron" class="fa-solid fa-chevron-down transition-transform duration-300"></i>
+        </button>
+
+        <div id="adv-form-section" class="hidden space-y-4 pt-3">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block font-bold text-slate-400 mb-1">Company Name</label>
+              <input type="text" id="cust-company" placeholder="Optional Company" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-800 rounded-xl focus:outline-none text-slate-800 dark:text-slate-100">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-400 mb-1">Address</label>
+              <input type="text" id="cust-address" placeholder="Delivery Address" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-800 rounded-xl focus:outline-none text-slate-800 dark:text-slate-100">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-400 mb-1">Status</label>
+              <select id="cust-status" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-800 rounded-xl focus:outline-none font-semibold">
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="withdrawn">Withdrawn</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-400 mb-1">Start Date</label>
+              <input type="date" id="cust-start" onchange="window.appCustomers.triggerAutoCalculateEndDate()" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-800 rounded-xl focus:outline-none">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-400 mb-1">End Date</label>
+              <input type="date" id="cust-end" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-800 rounded-xl focus:outline-none font-bold">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-400 mb-1">Catering Fee Cost (₹)</label>
+              <input type="number" id="cust-cost" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-800 rounded-xl focus:outline-none font-bold">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-400 mb-1">Paid Amount (₹)</label>
+              <input type="number" id="cust-paid" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-800 rounded-xl focus:outline-none font-bold">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-400 mb-1">Morning Route Driver</label>
+              <select id="cust-staff-id" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-800 rounded-xl focus:outline-none font-medium"></select>
+            </div>
+            <div>
+              <label class="block font-bold text-slate-400 mb-1">Evening Route Driver</label>
+              <select id="cust-evening-staff-id" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-800 rounded-xl focus:outline-none font-medium"></select>
+            </div>
           </div>
           <div>
-            <label class="block font-bold text-slate-400 mb-1">Status</label>
-            <select id="cust-status" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-800 rounded-xl focus:outline-none font-semibold">
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-              <option value="withdrawn">Withdrawn</option>
-            </select>
-          </div>
-          <div>
-            <label class="block font-bold text-slate-400 mb-1">Start Date</label>
-            <input type="date" id="cust-start" onchange="window.appCustomers.triggerAutoCalculateEndDate()" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-800 rounded-xl focus:outline-none">
-          </div>
-          <div>
-            <label class="block font-bold text-slate-400 mb-1">End Date</label>
-            <input type="date" id="cust-end" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-800 rounded-xl focus:outline-none font-bold">
-          </div>
-          <div>
-            <label class="block font-bold text-slate-400 mb-1">Catering Fee Cost (₹)</label>
-            <input type="number" id="cust-cost" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-800 rounded-xl focus:outline-none font-bold">
-          </div>
-          <div>
-            <label class="block font-bold text-slate-400 mb-1">Paid Amount (₹)</label>
-            <input type="number" id="cust-paid" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-800 rounded-xl focus:outline-none font-bold">
-          </div>
-          <div>
-            <label class="block font-bold text-slate-400 mb-1">Morning Route Driver</label>
-            <select id="cust-staff-id" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-800 rounded-xl focus:outline-none font-medium"></select>
-          </div>
-          <div>
-            <label class="block font-bold text-slate-400 mb-1">Evening Route Driver</label>
-            <select id="cust-evening-staff-id" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-800 rounded-xl focus:outline-none font-medium"></select>
+            <label class="block font-bold text-slate-400 mb-1">Preferences Notes</label>
+            <input type="text" id="cust-notes" placeholder="Delivery instructions" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-800 rounded-xl focus:outline-none">
           </div>
         </div>
 
-        <div>
-          <label class="block font-bold text-slate-400 mb-1">Preferences Notes</label>
-          <input type="text" id="cust-notes" placeholder="Delivery instructions" class="w-full p-2.5 bg-slate-50 dark:bg-slate-900 border dark:border-slate-800 rounded-xl focus:outline-none">
-        </div>
 
         <div class="flex space-x-3 pt-2">
           <button type="button" onclick="window.appCustomers.closeFormModal()" class="flex-1 py-2.5 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-650 text-slate-600 dark:text-slate-300 rounded-xl font-bold transition">Cancel</button>
