@@ -34,8 +34,10 @@ export function getSwedishDateString(date) {
   return formatLocalDate(date);
 }
 
+import { dataRegistry } from "./accessors.js";
+
 /**
- * Calculates a subscription end date (skipping Sundays)
+ * Calculates a subscription end date (skipping Sundays unless Sunday delivery is enabled)
  * @param {string} startDateStr 
  * @param {boolean} is6Days (true for 6-day trial/weekly plans, false for 26-day monthly plans)
  * @returns {string}
@@ -45,12 +47,12 @@ export function calculateEndDate(startDateStr, is6Days) {
   let current = parseLocalDate(startDateStr);
   if (!current || isNaN(current.getTime())) return '';
   
-  let added = (current.getDay() !== 0) ? 1 : 0;
+  let added = (!isSunday(current)) ? 1 : 0;
   const daysToDeliver = is6Days ? 6 : 26;
   
   while (added < daysToDeliver) {
     current.setDate(current.getDate() + 1);
-    if (current.getDay() !== 0) {
+    if (!isSunday(current)) {
       added++;
     }
   }
@@ -58,14 +60,19 @@ export function calculateEndDate(startDateStr, is6Days) {
 }
 
 /**
- * Checks if a date falls on a Sunday
+ * Checks if a date falls on a Sunday (returns false if deliverOnSundays is active in settings)
  * @param {Date|string} date 
  * @returns {boolean}
  */
 export function isSunday(date) {
+  const settings = dataRegistry.getSettings ? dataRegistry.getSettings() : {};
+  const deliverOnSundays = settings.deliverOnSundays === true || settings.deliverOnSundays === 'true';
+  if (deliverOnSundays) return false;
+
   const d = typeof date === 'string' ? parseLocalDate(date) : date;
   return d ? d.getDay() === 0 : false;
 }
+
 
 /**
  * Formats a 24-hour HH:MM time string into a 12-hour AM/PM format

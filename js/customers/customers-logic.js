@@ -31,12 +31,13 @@ export function isCustomerOnLeave(custId, dateStr) {
       const leaveDates = [];
       
       while (counted < days) {
-        if (temp.getDay() !== 0) {
+        if (!isSunday(temp)) {
           leaveDates.push(formatLocalDate(temp));
           counted++;
         }
         temp.setDate(temp.getDate() + 1);
       }
+
       
       if (leaveDates.includes(dateStr)) return true;
     } else {
@@ -92,7 +93,7 @@ export function recalculateCustomerEndDate(customer) {
   while (deliveryDaysCount < targetDays && iterations < 500) {
     iterations++;
     const dateStr = formatLocalDate(current);
-    const isSun = (current.getDay() === 0);
+    const isSun = isSunday(current);
     
     const onLeave = isCustomerOnLeave(customer.id, dateStr);
     const compensated = isLeaveCompensated(customer.id, dateStr);
@@ -100,6 +101,8 @@ export function recalculateCustomerEndDate(customer) {
     if (!isSun && (!onLeave || compensated)) {
       deliveryDaysCount++;
     }
+
+
     
     if (deliveryDaysCount < targetDays) {
       current.setDate(current.getDate() + 1);
@@ -142,9 +145,13 @@ export function getCustomerDeductionDetails(customer, settings) {
   }, 0);
 
   const basePlanCost = customer.cost || 0;
-  const deductionPerDay = customer.isTrial 
-    ? (parseFloat(settings.deductTrial) || 200) 
-    : (parseFloat(settings.deductMonthly) || 220);
+  let deductionPerDay = parseFloat(settings.deductMonthly) || 220;
+  if (customer.isTrial) {
+    deductionPerDay = parseFloat(settings.deductTrial) || 200;
+  } else if (customer.paymentTerm === 'weekly') {
+    deductionPerDay = parseFloat(settings.deductWeekly) || 220;
+  }
+
   
   const totalDeductions = totalLeaveDays * deductionPerDay;
   const subtotalDue = Math.max(0, basePlanCost - totalDeductions);

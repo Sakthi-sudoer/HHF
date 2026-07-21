@@ -140,15 +140,27 @@ export function switchView(viewId) {
  */
 function initDesignTokens() {
   const root = document.documentElement;
-  const colors = designTokens.colors;
+  const settings = dataRegistry.getSettings() || {};
+  const theme = settings.brandTheme || 'emerald';
+
+  const themesMap = {
+    emerald: { primary: '#059669', hover: '#047857', bg: '#ecfdf5' },
+    indigo: { primary: '#4f46e5', hover: '#4338ca', bg: '#e0e7ff' },
+    blue: { primary: '#2563eb', hover: '#1d4ed8', bg: '#dbeafe' },
+    rose: { primary: '#e11d48', hover: '#be123c', bg: '#ffe4e6' },
+    violet: { primary: '#7c3aed', hover: '#6d28d9', bg: '#f5f3ff' }
+  };
+
+  const colors = themesMap[theme] || themesMap.emerald;
   
-  root.style.setProperty('--brand-primary', colors.brand.primary);
-  root.style.setProperty('--brand-primary-hover', colors.brand.primaryHover);
-  root.style.setProperty('--brand-primary-bg', colors.brand.primaryBg);
+  root.style.setProperty('--brand-primary', colors.primary);
+  root.style.setProperty('--brand-primary-hover', colors.hover);
+  root.style.setProperty('--brand-primary-bg', colors.bg);
   
   // Apply font family
   root.style.fontFamily = designTokens.typography.fontFamily;
 }
+
 
 /**
  * Sign In Submission Handler
@@ -282,8 +294,10 @@ function initDatabaseSubscriptions() {
       todayDateStr: formatLocalDate(new Date()),
       deliveryStatus: dataRegistry.getDeliveries()
     });
+    initDesignTokens();
     renderAll();
   };
+
 
   const handleErr = (err) => {
     console.error("Firestore sync error", err);

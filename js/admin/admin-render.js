@@ -240,6 +240,16 @@ export function renderSettingsView() {
   const templateEl = document.getElementById('set-whatsapp-template');
   const fuelCostEl = document.getElementById('set-fuel-cost');
 
+  // New fields
+  const priceWeeEl = document.getElementById('set-price-weekly');
+  const deductWeeEl = document.getElementById('set-deduct-weekly');
+  const deliverSunEl = document.getElementById('set-deliver-sundays');
+  const brandThemeEl = document.getElementById('set-brand-theme');
+  const portionRiceEl = document.getElementById('set-portion-rice');
+  const portionDalEl = document.getElementById('set-portion-dal');
+  const portionVegEl = document.getElementById('set-portion-veg');
+  const portionOilEl = document.getElementById('set-portion-oil');
+
   if (nameEl) nameEl.value = settings.bizName || "Healthy Home's Foods";
   if (subEl) subEl.value = settings.bizSubtitle || "மந்த்லி கணக்கு மற்றும் டியூ டிராக்கர்";
   if (gpayNumEl) gpayNumEl.value = settings.gpayNumber || "7868888625";
@@ -250,6 +260,16 @@ export function renderSettingsView() {
   if (deductTriEl) deductTriEl.value = settings.deductTrial || 200;
   if (templateEl) templateEl.value = settings.whatsappTemplate || "வணக்கம் {name}, உங்களின் நிலுவைத் தொகை ₹{balance} ஆகும். நன்றி!";
   if (fuelCostEl) fuelCostEl.value = settings.fuelCostPerKm || 10;
+
+  // Populate new fields
+  if (priceWeeEl) priceWeeEl.value = settings.priceWeekly || 1350;
+  if (deductWeeEl) deductWeeEl.value = settings.deductWeekly || 220;
+  if (deliverSunEl) deliverSunEl.value = String(settings.deliverOnSundays === true || settings.deliverOnSundays === 'true');
+  if (brandThemeEl) brandThemeEl.value = settings.brandTheme || 'emerald';
+  if (portionRiceEl) portionRiceEl.value = settings.portionRice || 250;
+  if (portionDalEl) portionDalEl.value = settings.portionDal || 80;
+  if (portionVegEl) portionVegEl.value = settings.portionVeg || 120;
+  if (portionOilEl) portionOilEl.value = settings.portionOil || 15;
 }
 
 /**
@@ -267,7 +287,17 @@ export async function saveAppSettingsForm(e) {
     deductMonthly: parseFloat(document.getElementById('set-deduct-monthly').value) || 220,
     deductTrial: parseFloat(document.getElementById('set-deduct-trial').value) || 200,
     whatsappTemplate: document.getElementById('set-whatsapp-template').value,
-    fuelCostPerKm: parseFloat(document.getElementById('set-fuel-cost').value) || 10
+    fuelCostPerKm: parseFloat(document.getElementById('set-fuel-cost').value) || 10,
+    
+    // New fields
+    priceWeekly: parseFloat(document.getElementById('set-price-weekly').value) || 1350,
+    deductWeekly: parseFloat(document.getElementById('set-deduct-weekly').value) || 220,
+    deliverOnSundays: document.getElementById('set-deliver-sundays').value === 'true',
+    brandTheme: document.getElementById('set-brand-theme').value || 'emerald',
+    portionRice: parseFloat(document.getElementById('set-portion-rice').value) || 250,
+    portionDal: parseFloat(document.getElementById('set-portion-dal').value) || 80,
+    portionVeg: parseFloat(document.getElementById('set-portion-veg').value) || 120,
+    portionOil: parseFloat(document.getElementById('set-portion-oil').value) || 15
   };
 
   try {
@@ -277,6 +307,7 @@ export async function saveAppSettingsForm(e) {
     alert("Error updating application settings.");
   }
 }
+
 
 // Global hooks hookup
 window.appAdmin = {
