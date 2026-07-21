@@ -24,4 +24,6 @@ This document records the current stabilization health, completed phases, and re
 *   **Domain 4 (Vehicles & Trips):** Odometer validation and logs tracking under `js/vehicles/`.
 *   **Domain 5 (Finance):** Recognized revenue breakdowns and expense ledgers under `js/finance/`.
 *   **Domain 6 (Admin):** Spreadsheet inline editor with auto-save events under `js/admin/`.
-*   **Single-Page Shell:** Assembled semantic components and loaded modular scripts dynamically in `index.html`.
+*   **Domain 8 (Dashboard):** Interactive portions and billing metrics charts using Chart.js under `js/dashboard/`.
+*   **Single-Page Shell:** Assembled semantic components, integrated hover-retractable left sidebar navigation, and implemented AMOLED pitch-black overrides in `index.html` and `css/style.css`.
+

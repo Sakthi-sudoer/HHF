@@ -48,6 +48,10 @@ Every business feature has been rebuilt from scratch using the strict **3-file d
 *   [js/ai/ai-logic.js](file:///c:/Users/SAKTHIVEL/Desktop/HF/js/ai/ai-logic.js): Context JSON builder and Gemini API Client.
 *   [js/ai/ai-render.js](file:///c:/Users/SAKTHIVEL/Desktop/HF/js/ai/ai-render.js): Chat UI drawer slide-out widget and quick suggestions.
 
+### 9. Domain 8: Interactive Dashboard Analytics & Redesign
+*   [js/dashboard/dashboard-logic.js](file:///c:/Users/SAKTHIVEL/Desktop/HF/js/dashboard/dashboard-logic.js): Compiles data aggregations for financial audits, portion splits, and delivery lists.
+*   [js/dashboard/dashboard-render.js](file:///c:/Users/SAKTHIVEL/Desktop/HF/js/dashboard/dashboard-render.js): Manages Chart.js visual canvas updates and graph redraw processes.
+
 ---
 
 ## 🧪 Verification Status
@@ -55,7 +59,9 @@ Every business feature has been rebuilt from scratch using the strict **3-file d
 - [x] **Modular Import Test:** The application now runs with pure native ES6 module scripts and `<script type="module">` loader.
 - [x] **Timezone and Calendar shifts:** Subscriptions calculations correctly shift dates skipping Sundays.
 - [x] **Bypassed Auth Gating:** Bypassed auth gating to permit direct Netlify static hosting access.
-- [x] **Localization:** Supports Tamil/English translations.
-- [x] **AI Tamil Assistant integration:** Analyzes real-time Firestore database and prints projections in Tamil.
-- [x] **FAB Floating Shortcuts:** Toggles expandable menu bubbles to add records quickly.
+- [x] **AI Tamil Assistant integration:** Cycles through Gemini 2.x and 1.5 fallback loops, parsing lists as premium HTML tables and displaying multicolored highlights.
+- [x] **Google-Style Retractable Sidebar:** Retracts navigation menu to icons-only on desktop and expands dynamically when hovered.
+- [x] **AMOLED Black Theme:** Replaces dark-grey backdrops with pure AMOLED black (`#000000`) variables.
+- [x] **Chart.js Portions & Finance Visuals:** Renders real-time Portions, Plans, and Cash Flow graphs on Dashboard.
+
 

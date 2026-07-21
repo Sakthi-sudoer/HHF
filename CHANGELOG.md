@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [2.1.0] - 2026-07-21
+### Added
+*   **Chart.js Dashboard Charts:** Integrated interactive visualizations for Finance Audits (Revenue vs Expenses), Meal Portions Distribution, Subscribers Plans Split, and Daily Delivery progress logs.
+*   **AMOLED Black Theme:** Added custom pitch-black (`#000000`) stylesheet variables for dark-mode backdrops and elevated panels (`#0c0c0c`).
+*   **Hover-Retractable Navigation Sidebar:** Created vertical left sidebar menu collapsing to icons-only (`w-16`) on desktop and expanding to text labels (`w-72`) upon hover.
+*   **Sub-view parent tab highlights:** Wired parent highlight mappings in router configuration.
+*   **Gemini API Table rendering:** Added markdown tables parser converting AI chat responses into styled HTML tables with alternating row backgrounds.
+
 ## [2.0.0] - 2026-07-21
 ### Added
 *   **Modular Architecture:** Rebuilt the entire codebase from scratch using a strict **3-file domain pattern** across isolated modules (`/js/customers/`, `/js/delivery/`, `/js/kitchen/`, `/js/vehicles/`, `/js/finance/`, `/js/admin/`).

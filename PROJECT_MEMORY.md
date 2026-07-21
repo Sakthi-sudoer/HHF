@@ -45,3 +45,11 @@ All dates are parsed and formatted using local timezone values inside `js/core/s
 
 Access boundaries have been bypassed inside `js/core/auth.js`. The module automatically mocks an active session with the `admin` role on startup. This allows anyone loading the dashboard directly on Netlify or localhost to bypass sign-in modals and instantly gain full administrative access to all navigation tabs.
 
+---
+
+## 🌟 Custom UI Integrations
+*   **AMOLED Dark Theme:** Hard overrides applied to `.dark` classes inside `css/style.css` mapping background values to `#000000` (pitch-black) and `#0c0c0c` (elevated black) instead of tailwind's default dark slate values.
+*   **Hover-Retractable Navigation:** Handled with CSS transitions in `style.css` shifting sidebar widths from `md:w-16` to `md:w-72` on hover. Link spans fade in, margins transition, and buttons align.
+*   **Chart.js canvases:** Dashboard rendering initialized by `./js/dashboard/dashboard-render.js` utilizing global `window.Chart` references loaded via CDN inside `index.html`.
+
+
