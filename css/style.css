@@ -373,4 +373,41 @@ textarea:focus {
     background-color: var(--brand-primary-hover) !important;
 }
 
+/* 🌟 RETRACTABLE LEFT SIDEBAR GOOGLE STYLING */
+@media (min-width: 768px) {
+    /* Hide texts by default inside collapsed bar */
+    #sidebar-nav span {
+        display: none;
+        opacity: 0;
+        transition: opacity 0.25s ease-in-out;
+    }
+    
+    /* Show texts when expanded */
+    #sidebar-nav:hover span {
+        display: inline;
+        opacity: 1;
+    }
+
+    /* Center icons when collapsed, left-align when hovered */
+    #sidebar-nav button {
+        justify-content: center;
+        transition: justify-content 0.2s ease-in-out;
+    }
+    
+    #sidebar-nav:hover button {
+        justify-content: flex-start;
+    }
+    
+    /* Remove padding right on icons when collapsed, restore it on hover */
+    #sidebar-nav button i {
+        margin-right: 0px !important;
+        transition: margin 0.2s ease-in-out;
+    }
+    
+    #sidebar-nav:hover button i {
+        margin-right: 12px !important;
+    }
+}
+
+
 

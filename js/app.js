@@ -34,6 +34,7 @@ import "./vehicles/vehicles-render.js";
 import "./finance/finance-render.js";
 import "./admin/admin-render.js";
 import { initAIChatWidget } from "./ai/ai-render.js";
+import { renderDashboardCharts } from "./dashboard/dashboard-render.js";
 
 
 
@@ -95,6 +96,9 @@ export function renderAll() {
     safeRun('renderAdminExcel', () => window.appAdmin.renderExcel());
     safeRun('renderAdminSettings', () => window.appAdmin.renderSettings());
   }
+  if (activeTab === 'dashboard') {
+    safeRun('renderDashboardCharts', () => renderDashboardCharts());
+  }
 }
 
 /**
@@ -136,6 +140,12 @@ export function switchView(viewId) {
       }
     }
   });
+
+  if (viewId === 'dashboard') {
+    setTimeout(() => {
+      renderDashboardCharts();
+    }, 100);
+  }
 
   // Re-run screen renders
   renderAll();
@@ -363,7 +373,8 @@ function updateRoleBasedInterface(role) {
 window.appCore = {
   switchView,
   logout: logoutUser,
-  toggleSidebar
+  toggleSidebar,
+  renderDashboardCharts
 };
 
 

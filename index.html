@@ -13,6 +13,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght=300;400;500;600;700&family=Mukta+Malar:wght=400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-slate-50 dark:bg-slate-900 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col transition-all duration-300">
 
@@ -43,57 +44,55 @@
   </header>
 
   <!-- Google-Style Sidebar & Content Wrapper Grid -->
-  <div class="flex-1 flex flex-col md:flex-row w-full max-w-7xl mx-auto min-h-[calc(100vh-64px)] relative">
-    
-    <!-- LEFT SIDEBAR NAVIGATION -->
-    <aside id="sidebar-nav" class="w-72 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-750 flex flex-col transition-all duration-300 md:translate-x-0 -translate-x-full fixed md:sticky left-0 top-[64px] h-[calc(100vh-64px)] z-30 md:z-0 shadow-lg md:shadow-none py-4 px-3 space-y-4 overflow-y-auto no-scrollbar">
+  <div class="flex-1 flex flex-col md:flex-row w-full max-w-7xl mx-auto min-h-[calc(100vh-64px)] relati    <!-- LEFT SIDEBAR NAVIGATION (Hover-retractable on desktop) -->
+    <aside id="sidebar-nav" class="group md:w-16 hover:md:w-72 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-750 flex flex-col transition-all duration-300 ease-in-out md:translate-x-0 -translate-x-full fixed md:sticky left-0 top-[64px] h-[calc(100vh-64px)] z-30 shadow-lg md:shadow-none py-4 px-3 space-y-4 overflow-y-auto overflow-x-hidden no-scrollbar">
       
       <!-- Core views -->
-      <button id="d-tab-dashboard" onclick="window.appCore.switchView('dashboard')" class="w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 text-white shadow">
-        <i class="fa-solid fa-chart-line text-sm w-5"></i>
-        <span data-i18n="nav.dashboard">Dashboard</span>
+      <button id="d-tab-dashboard" onclick="window.appCore.switchView('dashboard')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 text-white shadow">
+        <i class="fa-solid fa-chart-line text-base w-5 text-center flex-shrink-0"></i>
+        <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap" data-i18n="nav.dashboard">Dashboard</span>
       </button>
 
       <!-- Section: Operations -->
       <div class="space-y-1 pt-2">
-        <span class="px-3 text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-1">Operations</span>
-        <button id="d-tab-delivery" onclick="window.appCore.switchView('delivery')" class="w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all hidden">
-          <i class="fa-solid fa-clipboard-list text-sm w-5"></i>
-          <span data-i18n="nav.delivery">Deliveries</span>
+        <span class="px-3 text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">Operations</span>
+        <button id="d-tab-delivery" onclick="window.appCore.switchView('delivery')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all hidden">
+          <i class="fa-solid fa-clipboard-list text-base w-5 text-center flex-shrink-0"></i>
+          <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap" data-i18n="nav.delivery">Deliveries</span>
         </button>
-        <button id="d-tab-kitchen" onclick="window.appCore.switchView('kitchen')" class="w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all hidden">
-          <i class="fa-solid fa-fire-burner text-sm w-5"></i>
-          <span data-i18n="nav.kitchen">Kitchen</span>
+        <button id="d-tab-kitchen" onclick="window.appCore.switchView('kitchen')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all hidden">
+          <i class="fa-solid fa-fire-burner text-base w-5 text-center flex-shrink-0"></i>
+          <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap" data-i18n="nav.kitchen">Kitchen</span>
         </button>
-        <button id="d-tab-vehicles" onclick="window.appCore.switchView('vehicles')" class="w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all hidden">
-          <i class="fa-solid fa-motorcycle text-sm w-5"></i>
-          <span data-i18n="nav.vehicles">Vehicles</span>
+        <button id="d-tab-vehicles" onclick="window.appCore.switchView('vehicles')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all hidden">
+          <i class="fa-solid fa-motorcycle text-base w-5 text-center flex-shrink-0"></i>
+          <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap" data-i18n="nav.vehicles">Vehicles</span>
         </button>
       </div>
 
       <!-- Section: Financials -->
       <div class="space-y-1 pt-2">
-        <span class="px-3 text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-1">Financials</span>
-        <button id="d-tab-customers" onclick="window.appCore.switchView('customers')" class="w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all hidden">
-          <i class="fa-solid fa-users text-sm w-5"></i>
-          <span data-i18n="nav.customers">Customers</span>
+        <span class="px-3 text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">Financials</span>
+        <button id="d-tab-customers" onclick="window.appCore.switchView('customers')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all hidden">
+          <i class="fa-solid fa-users text-base w-5 text-center flex-shrink-0"></i>
+          <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap" data-i18n="nav.customers">Customers</span>
         </button>
-        <button id="d-tab-finance" onclick="window.appCore.switchView('finance')" class="w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all hidden">
-          <i class="fa-solid fa-wallet text-sm w-5"></i>
-          <span data-i18n="nav.finance">Finance</span>
+        <button id="d-tab-finance" onclick="window.appCore.switchView('finance')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all hidden">
+          <i class="fa-solid fa-wallet text-base w-5 text-center flex-shrink-0"></i>
+          <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap" data-i18n="nav.finance">Finance</span>
         </button>
       </div>
 
       <!-- Section: System -->
       <div class="space-y-1 pt-2">
-        <span class="px-3 text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-1">System Control</span>
-        <button id="d-tab-admin" onclick="window.appCore.switchView('admin')" class="w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all hidden">
-          <i class="fa-solid fa-table text-sm w-5"></i>
-          <span data-i18n="nav.admin">Control Panel</span>
+        <span class="px-3 text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">System Control</span>
+        <button id="d-tab-admin" onclick="window.appCore.switchView('admin')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all hidden">
+          <i class="fa-solid fa-table text-base w-5 text-center flex-shrink-0"></i>
+          <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap" data-i18n="nav.admin">Control Panel</span>
         </button>
-        <button id="d-tab-settings" onclick="window.appCore.switchView('settings')" class="w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all">
-          <i class="fa-solid fa-sliders text-sm w-5"></i>
-          <span data-i18n="nav.settings">Settings</span>
+        <button id="d-tab-settings" onclick="window.appCore.switchView('settings')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all">
+          <i class="fa-solid fa-sliders text-base w-5 text-center flex-shrink-0"></i>
+          <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap" data-i18n="nav.settings">Settings</span>
         </button>
       </div>
 
@@ -129,12 +128,69 @@
 
 
     <!-- VIEW: DASHBOARD -->
-    <section id="view-dashboard" class="space-y-4">
-      <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border dark:border-slate-750 shadow-sm text-center py-12 space-y-3">
-        <h2 class="text-lg font-bold text-emerald-600 dark:text-emerald-400" data-i18n="dashboard.title">Welcome to Enterprise Dashboard</h2>
-        <p class="text-xs text-slate-400 max-w-sm mx-auto">Please switch tabs above to manage customer profiles, delivery spreadsheets, kitchen ingredients, and vehicle statistics.</p>
+    <section id="view-dashboard" class="space-y-6">
+      <!-- Welcome Header Banner -->
+      <div class="bg-gradient-to-r from-emerald-650 to-teal-650 dark:from-slate-800 dark:to-slate-750 p-5 rounded-3xl text-white shadow-sm flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h2 class="text-sm md:text-base font-bold" data-i18n="dashboard.title">Welcome to Enterprise Dashboard</h2>
+          <p class="text-[10px] md:text-xs text-emerald-100 dark:text-slate-400 max-w-lg mt-0.5">Real-time catering logs, financial metrics auditing, kitchen preparation forecasts, and delivery progress tracking.</p>
+        </div>
+        <button onclick="window.appCore.renderDashboardCharts()" class="bg-white/20 hover:bg-white/30 text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 shadow-sm">
+          <i class="fa-solid fa-arrows-rotate"></i>
+          <span>Refresh Dashboard</span>
+        </button>
+      </div>
+
+      <!-- Charts Grid -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        
+        <!-- Card 1: Revenue vs Expenses -->
+        <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl border dark:border-slate-750 shadow-sm flex flex-col min-h-[300px]">
+          <h4 class="font-bold text-[10px] md:text-xs text-slate-600 dark:text-slate-400 mb-4 flex items-center space-x-2 uppercase tracking-wider">
+            <i class="fa-solid fa-scale-balanced text-emerald-600 dark:text-emerald-400 text-sm"></i>
+            <span>வருவாய் vs செலவு கணக்கு (Revenue vs Expenses Audit)</span>
+          </h4>
+          <div class="flex-1 relative flex items-center justify-center">
+            <canvas id="chart-revenue-expenses" class="max-h-[220px] w-full"></canvas>
+          </div>
+        </div>
+
+        <!-- Card 2: Portions Demand Distribution -->
+        <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl border dark:border-slate-750 shadow-sm flex flex-col min-h-[300px]">
+          <h4 class="font-bold text-[10px] md:text-xs text-slate-600 dark:text-slate-400 mb-4 flex items-center space-x-2 uppercase tracking-wider">
+            <i class="fa-solid fa-bowl-food text-emerald-600 dark:text-emerald-400 text-sm"></i>
+            <span>உணவுத் தேவை பகிர்வு (Meal Portions Distribution)</span>
+          </h4>
+          <div class="flex-1 relative flex items-center justify-center">
+            <canvas id="chart-meals-distribution" class="max-h-[220px] w-full"></canvas>
+          </div>
+        </div>
+
+        <!-- Card 3: Subscribers Plans Split -->
+        <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl border dark:border-slate-750 shadow-sm flex flex-col min-h-[300px]">
+          <h4 class="font-bold text-[10px] md:text-xs text-slate-600 dark:text-slate-400 mb-4 flex items-center space-x-2 uppercase tracking-wider">
+            <i class="fa-solid fa-users-viewfinder text-emerald-600 dark:text-emerald-400 text-sm"></i>
+            <span>திட்டங்களின் வாரியாக பிரிப்பு (Subscriber Plans Split)</span>
+          </h4>
+          <div class="flex-1 relative flex items-center justify-center">
+            <canvas id="chart-customers-status" class="max-h-[220px] w-full"></canvas>
+          </div>
+        </div>
+
+        <!-- Card 4: Daily Delivery Checklist Tracker -->
+        <div class="bg-white dark:bg-slate-800 p-5 rounded-3xl border dark:border-slate-750 shadow-sm flex flex-col min-h-[300px]">
+          <h4 class="font-bold text-[10px] md:text-xs text-slate-600 dark:text-slate-400 mb-4 flex items-center space-x-2 uppercase tracking-wider">
+            <i class="fa-solid fa-truck-ramp-box text-emerald-600 dark:text-emerald-400 text-sm"></i>
+            <span>டெலிவரி நிலவரம் (Checklist Delivery Progress)</span>
+          </h4>
+          <div class="flex-1 relative flex items-center justify-center">
+            <canvas id="chart-delivery-progress" class="max-h-[220px] w-full"></canvas>
+          </div>
+        </div>
+
       </div>
     </section>
+
 
     <!-- VIEW: CUSTOMERS -->
     <section id="view-customers" class="space-y-4 hidden">
