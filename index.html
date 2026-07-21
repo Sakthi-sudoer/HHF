@@ -1040,6 +1040,30 @@
     </div>
   </div>
 
+  <!-- Floating Action Button (FAB) Container -->
+  <div class="fixed bottom-20 md:bottom-6 right-6 z-50 flex flex-col items-end space-y-2.5" id="fab-container">
+    <!-- Expandable menu items -->
+    <div class="hidden flex flex-col items-end space-y-2.5 transition-all duration-300 transform scale-90 opacity-0 origin-bottom" id="fab-menu">
+      <button onclick="window.openAddModal(); window.toggleFabMenu();" class="flex items-center space-x-2 bg-emerald-600 hover:bg-emerald-700 text-white px-3.5 py-2 rounded-full shadow-lg text-[10px] font-bold transition">
+        <span>வாடிக்கையாளர் சேர்க்க (Add Customer)</span>
+        <div class="w-7 h-7 rounded-full bg-emerald-700 flex items-center justify-center"><i class="fa-solid fa-user-plus text-xs"></i></div>
+      </button>
+      <button onclick="window.quickAddExpense(); window.toggleFabMenu();" class="flex items-center space-x-2 bg-rose-600 hover:bg-rose-700 text-white px-3.5 py-2 rounded-full shadow-lg text-[10px] font-bold transition">
+        <span>செலவு பதிவு செய்ய (Log Expense)</span>
+        <div class="w-7 h-7 rounded-full bg-rose-700 flex items-center justify-center"><i class="fa-solid fa-wallet text-xs"></i></div>
+      </button>
+      <button onclick="window.quickAddLeave(); window.toggleFabMenu();" class="flex items-center space-x-2 bg-amber-600 hover:bg-amber-700 text-white px-3.5 py-2 rounded-full shadow-lg text-[10px] font-bold transition">
+        <span>விடுப்பு பதிவு செய்ய (Add Leave)</span>
+        <div class="w-7 h-7 rounded-full bg-amber-700 flex items-center justify-center"><i class="fa-solid fa-calendar-minus text-xs"></i></div>
+      </button>
+    </div>
+
+    <!-- Main FAB Trigger Button -->
+    <button onclick="window.toggleFabMenu()" class="w-14 h-14 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full flex items-center justify-center shadow-2xl transition transform hover:scale-105 active:scale-95 duration-200">
+      <i id="fab-plus-icon" class="fa-solid fa-plus text-xl transition-all duration-300"></i>
+    </button>
+  </div>
+
   <script type="module" src="js/app.js"></script>
 </body>
 </html>
