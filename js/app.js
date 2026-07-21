@@ -33,6 +33,8 @@ import "./kitchen/kitchen-render.js";
 import "./vehicles/vehicles-render.js";
 import "./finance/finance-render.js";
 import "./admin/admin-render.js";
+import { initAIChatWidget } from "./ai/ai-render.js";
+
 
 
 // Active Tab navigation state
@@ -204,6 +206,10 @@ window.addEventListener('DOMContentLoaded', async () => {
   // Load Offline Cache data initially
   loadCachedOfflineData();
 
+  // Initialize AI Chat assistant drawer widget
+  initAIChatWidget();
+
+
 
   // Setup Firebase Auth session gates listener
   onAuthChange((user, role) => {
@@ -323,3 +329,53 @@ window.appCore = {
   switchView,
   logout: logoutUser
 };
+
+// 🌟 FLOATING ACTION BUTTON (FAB) SHORTCUTS IMPLEMENTATION
+export function toggleFabMenu() {
+  const menu = document.getElementById('fab-menu');
+  const icon = document.getElementById('fab-plus-icon');
+  if (menu) {
+    if (menu.classList.contains('hidden')) {
+      menu.classList.remove('hidden');
+      setTimeout(() => {
+        menu.classList.remove('opacity-0', 'scale-90');
+        menu.classList.add('opacity-100', 'scale-100');
+      }, 10);
+      if (icon) icon.classList.add('rotate-45');
+    } else {
+      menu.classList.remove('opacity-100', 'scale-100');
+      menu.classList.add('opacity-0', 'scale-90');
+      setTimeout(() => {
+        menu.classList.add('hidden');
+      }, 300);
+      if (icon) icon.classList.remove('rotate-45');
+    }
+  }
+}
+
+export function openAddModal() {
+  if (window.appCustomers?.openEditForm) {
+    window.appCustomers.openEditForm();
+  } else {
+    alert("Customers registry module is not loaded yet.");
+  }
+}
+
+export function quickAddExpense() {
+  switchView('finance');
+  setTimeout(() => {
+    document.getElementById('exp-item')?.focus();
+  }, 200);
+}
+
+export function quickAddLeave() {
+  switchView('delivery');
+  alert("Please select the 'Action' button on any customer checklist card in the Deliveries list to log a leave or alternate makeup date.");
+}
+
+// Bind to window object for inline HTML onclick attributes compatibility
+window.toggleFabMenu = toggleFabMenu;
+window.openAddModal = openAddModal;
+window.quickAddExpense = quickAddExpense;
+window.quickAddLeave = quickAddLeave;
+
