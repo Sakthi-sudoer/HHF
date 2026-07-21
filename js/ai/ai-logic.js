@@ -146,7 +146,7 @@ ${dbContext}
     parts: [{ text: userMessage }]
   });
 
-  let lastError = null;
+  const errorReports = [];
 
   for (let attempt of attempts) {
     const endpoint = `https://generativelanguage.googleapis.com/${attempt.ver}/models/${attempt.model}:generateContent?key=${apiKey}`;
@@ -170,14 +170,18 @@ ${dbContext}
         }
       } else {
         const errData = await response.json();
-        lastError = new Error(errData.error?.message || `HTTP ${response.status}`);
+        const msg = errData.error?.message || `HTTP ${response.status}`;
+        console.warn(`Gemini Model ${attempt.model} failed:`, msg);
+        errorReports.push(`${attempt.model} (${attempt.ver}): ${msg}`);
       }
     } catch (err) {
-      lastError = err;
+      console.warn(`Gemini Model ${attempt.model} exception:`, err.message);
+      errorReports.push(`${attempt.model} (${attempt.ver}): ${err.message}`);
     }
   }
 
-  throw lastError || new Error("All Google Gemini API model connection attempts failed.");
+  throw new Error("இணைப்புத் தோல்வி விவரங்கள்:\n" + errorReports.map((r, i) => `${i+1}. ${r}`).join('\n'));
+
 }
 
 /**
