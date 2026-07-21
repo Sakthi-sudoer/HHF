@@ -209,11 +209,29 @@ function appendMessage(role, text) {
   const bubble = document.createElement('div');
   bubble.className = "flex items-start space-x-2 " + (role === 'user' ? 'justify-end' : '');
   
-  // Format formatting rules: simple markdown newlines replacement
-  const formattedText = text
-    .replace(/\n/g, '<br>')
-    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    .replace(/\*(.*?)\*/g, '<em>$1</em>');
+  let formattedText = text;
+
+  if (role === 'model') {
+    // 1. Process Headings to Indigo, Bold, Underlined
+    formattedText = formattedText.replace(/###\s*(.*?)(?:\r?\n|$)/g, '<span class="block font-bold text-xs text-indigo-600 dark:text-indigo-400 underline mt-2 mb-0.5">$1</span>');
+    formattedText = formattedText.replace(/##\s*(.*?)(?:\r?\n|$)/g, '<span class="block font-bold text-sm text-indigo-600 dark:text-indigo-400 underline mt-3 mb-1">$1</span>');
+
+    // 2. Process Bold text to Rose, Bold, Underlined
+    formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong class="font-extrabold text-rose-600 dark:text-rose-450 underline">$1</strong>');
+    
+    // 3. Highlight money/numbers in Emerald Green, Bold
+    formattedText = formattedText.replace(/(₹\s*\d+(?:\.\d+)?|\b\d+\s*(?:Portions|கி.மீ|kg|Litres|நபர்கள்|ரூபாய்|days)\b)/gi, '<span class="font-bold text-emerald-600 dark:text-emerald-400">$1</span>');
+
+    // 4. Line breaks and italics
+    formattedText = formattedText
+      .replace(/\n/g, '<br>')
+      .replace(/\*(.*?)\*/g, '<em class="italic text-slate-500">$1</em>');
+  } else {
+    formattedText = formattedText
+      .replace(/\n/g, '<br>')
+      .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold">$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>');
+  }
 
   if (role === 'user') {
     bubble.innerHTML = `
@@ -233,6 +251,7 @@ function appendMessage(role, text) {
   container.appendChild(bubble);
   container.scrollTop = container.scrollHeight;
 }
+
 
 function appendLoadingBubble() {
   const container = document.getElementById('ai-messages-container');

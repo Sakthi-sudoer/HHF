@@ -112,11 +112,13 @@ Your capabilities include:
 4. Analyzing vehicle distances, trips frequencies, and estimating fuel rates per kilometer.
 5. Providing growth predictions and cost reductions.
 
-Ensure your tone is premium, helpful, and operationally precise. Use bullet points and small tabular summaries when answering financial metrics.
+Ensure your tone is premium, helpful, and operationally precise.
+CRITICAL DESIGN RULE: DO NOT USE TABLES. Never output markdown tables. Represent all metrics, lists, calculations, and breakdowns using structured bullet points, emojis, bold headings, and clear text paragraphs only.
 
 DATABASE CONTEXT SNAPSHOT (JSON):
 ${dbContext}
 `;
+
 
   // Build content request payload including history
   const contents = [
