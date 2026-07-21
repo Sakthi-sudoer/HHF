@@ -1,101 +1,93 @@
-/* 🌟 PREMIUM OBSIDIAN DARK MODE & EXCEL GRID STYLE SYSTEM */
+/* 🌟 PREMIUM DUAL-THEME LAYOUT SYSTEM (LIGHT & OBSIDIAN DARK) */
 
-/* 1. Global Reset & Body Theme Override */
+/* 1. Global Font & General Styles */
 body {
     font-family: 'Poppins', 'Mukta Malar', sans-serif;
     -webkit-tap-highlight-color: transparent;
-    background-color: #0b0f19 !important;
-    color: #e2e8f0 !important;
-    font-size: 14px; /* Easily readable medium-sized text */
+    font-size: 14px;
+    background-color: #f8fafc;
+    color: #1e293b;
+    transition: background-color 0.3s, color 0.3s;
 }
 
-/* 2. Global Dark Color Palette Overrides for Tailwind classes */
-.bg-white {
-    background-color: #151c2c !important; /* Deep charcoal navy card */
+/* Obsidian Dark Theme overrides */
+html.dark body {
+    background-color: #0b0f19 !important;
+    color: #e2e8f0 !important;
+}
+
+/* 2. Background and Text Color overrides */
+.dark .bg-white {
+    background-color: #151c2c !important;
     color: #f1f5f9 !important;
 }
 
-.bg-slate-50 {
-    background-color: #0d121f !important; /* Body background fallback */
+.dark .bg-slate-50 {
+    background-color: #0d121f !important;
 }
 
-.bg-slate-100 {
-    background-color: #1b2438 !important; /* Light accent block */
+.dark .bg-slate-100 {
+    background-color: #1b2438 !important;
 }
 
-/* Custom background color overrides for badges and widget containers */
-.bg-emerald-50, .bg-emerald-50\/50, .bg-emerald-50\/40 {
+/* Widget Backgrounds in dark mode */
+.dark .bg-emerald-50, .dark .bg-emerald-50\/50, .dark .bg-emerald-50\/40 {
     background-color: #064e3b !important;
     color: #a7f3d0 !important;
 }
 
-.bg-blue-50, .bg-blue-50\/50, .bg-blue-50\/40 {
+.dark .bg-blue-50, .dark .bg-blue-50\/50, .dark .bg-blue-50\/40 {
     background-color: #1e3a8a !important;
     color: #bfdbfe !important;
 }
 
-.bg-rose-50, .bg-rose-50\/50, .bg-rose-50\/40 {
+.dark .bg-rose-50, .dark .bg-rose-50\/50, .dark .bg-rose-50\/40 {
     background-color: #881337 !important;
     color: #fecdd3 !important;
 }
 
-.bg-purple-50, .bg-purple-50\/50, .bg-purple-50\/40 {
+.dark .bg-purple-50, .dark .bg-purple-50\/50, .dark .bg-purple-50\/40 {
     background-color: #581c87 !important;
     color: #e9d5ff !important;
 }
 
-.bg-sky-50, .bg-sky-50\/50, .bg-sky-50\/40 {
+.dark .bg-sky-50, .dark .bg-sky-50\/50, .dark .bg-sky-50\/40 {
     background-color: #0c4a6e !important;
     color: #bae6fd !important;
 }
 
-.bg-amber-50, .bg-amber-50\/50, .bg-amber-50\/40 {
+.dark .bg-amber-50, .dark .bg-amber-50\/50, .dark .bg-amber-50\/40 {
     background-color: #78350f !important;
     color: #fde68a !important;
 }
 
-/* Custom text color overrides */
-.text-emerald-600, .text-emerald-700, .text-emerald-800 {
+/* Text Colors in dark mode */
+.dark .text-emerald-600, .dark .text-emerald-700, .dark .text-emerald-800 {
     color: #34d399 !important;
 }
-.text-rose-600, .text-rose-700, .text-rose-800 {
+.dark .text-rose-600, .dark .text-rose-700, .dark .text-rose-800 {
     color: #fb7185 !important;
 }
-.text-amber-600, .text-amber-700, .text-amber-800 {
+.dark .text-amber-600, .dark .text-amber-700, .dark .text-amber-800 {
     color: #fbbf24 !important;
 }
-.text-sky-600, .text-sky-700, .text-sky-800 {
+.dark .text-sky-600, .dark .text-sky-700, .dark .text-sky-800 {
     color: #38bdf8 !important;
 }
-.text-indigo-600, .text-indigo-700, .text-indigo-800 {
+.dark .text-indigo-600, .dark .text-indigo-700, .dark .text-indigo-800 {
     color: #818cf8 !important;
 }
+.dark .text-slate-800 { color: #f1f5f9 !important; }
+.dark .text-slate-700 { color: #cbd5e1 !important; }
+.dark .text-slate-600 { color: #94a3b8 !important; }
+.dark .text-slate-500 { color: #64748b !important; }
+.dark .text-slate-400 { color: #64748b !important; }
 
-.text-slate-800 {
-    color: #f1f5f9 !important;
-}
-
-.text-slate-700 {
-    color: #cbd5e1 !important;
-}
-
-.text-slate-600 {
-    color: #94a3b8 !important;
-}
-
-.text-slate-500 {
-    color: #64748b !important;
-}
-
-.text-slate-400 {
-    color: #64748b !important;
-}
-
-/* Borders */
-.border,
-.border-slate-100,
-.border-slate-200,
-.border-slate-300 {
+/* Borders in dark mode */
+.dark .border,
+.dark .border-slate-100,
+.dark .border-slate-200,
+.dark .border-slate-300 {
     border-color: #1e293b !important;
 }
 
@@ -107,6 +99,21 @@ input[type="date"],
 input[type="password"],
 select,
 textarea {
+    background-color: #ffffff;
+    color: #1e293b;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 6px 10px;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+.dark input[type="text"],
+.dark input[type="number"],
+.dark input[type="tel"],
+.dark input[type="date"],
+.dark input[type="password"],
+.dark select,
+.dark textarea {
     background-color: #0b0f19 !important;
     color: #f1f5f9 !important;
     border-color: #334155 !important;
@@ -119,12 +126,12 @@ input[type="date"]:focus,
 input[type="password"]:focus,
 select:focus,
 textarea:focus {
-    border-color: #10b981 !important; /* Emerald green focus */
+    border-color: #10b981 !important;
     outline: none;
     box-shadow: 0 0 0 1px #10b981;
 }
 
-/* Navigation & Button overrides */
+/* Navigation & Buttons */
 .active-filter-green {
     background-color: #059669 !important;
     color: white !important;
@@ -145,74 +152,109 @@ textarea:focus {
     height: 6px;
 }
 .scroll-container::-webkit-scrollbar-track {
-    background: #0f172a;
+    background: #f1f5f9;
     border-radius: 10px;
+}
+.dark .scroll-container::-webkit-scrollbar-track {
+    background: #0f172a;
 }
 .scroll-container::-webkit-scrollbar-thumb {
-    background: #334155;
+    background: #cbd5e1;
     border-radius: 10px;
 }
+.dark .scroll-container::-webkit-scrollbar-thumb {
+    background: #334155;
+}
 .scroll-container::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+.dark .scroll-container::-webkit-scrollbar-thumb:hover {
     background: #475569;
 }
 
 /* 3. Excel master editor styles */
 .excel-container {
-    background-color: #0b0f19;
-    border: 1px solid #1e293b;
+    background-color: #ffffff;
+    border: 1px solid #cbd5e1;
     border-radius: 12px;
     overflow-x: auto;
+}
+.dark .excel-container {
+    background-color: #0b0f19;
+    border-color: #1e293b;
 }
 
 .excel-table {
     width: 100%;
     border-collapse: collapse;
     font-size: 13px;
+    color: #1e293b;
+}
+.dark .excel-table {
     color: #f1f5f9;
 }
 
 .excel-table th {
-    background-color: #1e293b;
-    color: #94a3b8;
+    background-color: #f1f5f9;
+    color: #475569;
     font-weight: 600;
     text-align: left;
     padding: 8px 12px;
-    border: 1px solid #334155;
+    border: 1px solid #cbd5e1;
     user-select: none;
     font-size: 12px;
 }
+.dark .excel-table th {
+    background-color: #1e293b;
+    color: #94a3b8;
+    border-color: #334155;
+}
 
 .excel-table td {
-    padding: 2px 4px; /* Tight padding to look like excel cells */
-    border: 1px solid #1e293b;
+    padding: 2px 4px;
+    border: 1px solid #e2e8f0;
     vertical-align: middle;
+}
+.dark .excel-table td {
+    border-color: #1e293b;
 }
 
 .excel-row:nth-child(even) {
+    background-color: #f8fafc;
+}
+.dark .excel-row:nth-child(even) {
     background-color: #111827;
 }
 
 .excel-row:hover {
+    background-color: #e2e8f0;
+}
+.dark .excel-row:hover {
     background-color: #1b2438;
 }
 
-/* Excel Input Field cell styling */
 .excel-cell-input {
     width: 100%;
     height: 32px;
     background: transparent !important;
     border: none !important;
     padding: 4px 8px;
-    color: #f1f5f9 !important;
+    color: #1e293b !important;
     font-size: 13px;
     border-radius: 0 !important;
 }
+.dark .excel-cell-input {
+    color: #f1f5f9 !important;
+}
 
 .excel-cell-input:focus {
-    background-color: #090d16 !important;
+    background-color: #f1f5f9 !important;
     outline: 2px solid #10b981 !important;
     outline-offset: -2px;
     box-shadow: none !important;
+}
+.dark .excel-cell-input:focus {
+    background-color: #090d16 !important;
 }
 
 .excel-cell-select {
@@ -221,14 +263,20 @@ textarea:focus {
     background: transparent !important;
     border: none !important;
     padding: 4px 8px;
-    color: #f1f5f9 !important;
+    color: #1e293b !important;
     font-size: 13px;
+}
+.dark .excel-cell-select {
+    color: #f1f5f9 !important;
 }
 
 .excel-cell-select:focus {
-    background-color: #090d16 !important;
+    background-color: #f1f5f9 !important;
     outline: 2px solid #10b981 !important;
     outline-offset: -2px;
+}
+.dark .excel-cell-select:focus {
+    background-color: #090d16 !important;
 }
 
 .excel-save-indicator {
@@ -242,16 +290,61 @@ textarea:focus {
 }
 
 .excel-row.modified .excel-save-indicator {
-    opacity: 1; /* Show dot if row is modified */
+    opacity: 1;
 }
 
-/* Excel Index columns A, B, C... styling */
 .excel-index-col {
-    background-color: #151c2c;
+    background-color: #e2e8f0;
     color: #475569;
     text-align: center !important;
     font-weight: bold;
     font-size: 10px;
     width: 35px;
-    border: 1px solid #334155 !important;
+    border: 1px solid #cbd5e1 !important;
 }
+.dark .excel-index-col {
+    background-color: #151c2c;
+    color: #475569;
+    border-color: #334155 !important;
+}
+
+/* Glassmorphism support classes */
+.glass-effect {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background-color: rgba(255, 255, 255, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.dark .glass-effect {
+    background-color: rgba(21, 28, 44, 0.6) !important;
+    border: 1px solid rgba(255, 255, 255, 0.05) !important;
+}
+
+/* 4. Trip Timeline & Vehicle Layout Styles */
+.timeline-item {
+    position: relative;
+}
+.timeline-node {
+    position: absolute;
+    left: -22px;
+    top: 10px;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background-color: #10b981;
+    border: 3px solid #ffffff;
+    z-index: 10;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.15);
+    transition: all 0.3s ease;
+}
+.dark .timeline-node {
+    border-color: #151c2c;
+    box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.3);
+}
+.timeline-item:hover .timeline-node {
+    transform: scale(1.25);
+    background-color: #059669;
+    box-shadow: 0 0 0 4px rgba(5, 150, 105, 0.25);
+}
+

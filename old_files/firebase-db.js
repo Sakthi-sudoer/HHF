@@ -1,6 +1,6 @@
 // 🌟 FIREBASE & FIRESTORE DATABASE SYNCHRONIZATION MODULE
 
-// 1. Firebase configuration (Default placeholder from healthy.html)
+// 1. Firebase configuration (Production Project - hhfoods-3ab9b)
 const firebaseConfig = {
     apiKey: "AIzaSyCzYfDtoOjLumIwT8xXxMoLHlnfpbLkqC8",
     authDomain: "hhfoods-3ab9b.firebaseapp.com",
@@ -34,6 +34,8 @@ const KEY_EXP = 'hh_exp_enterprise_v8';
 const KEY_STAFF = 'hh_staff_enterprise_v8';
 const KEY_SKIPS = 'hh_skips_enterprise_v8';
 const KEY_ALTS = 'hh_alts_enterprise_v8';
+const KEY_VEHICLES = 'hh_vehicles_enterprise_v8';
+const KEY_TRIPS = 'hh_trips_enterprise_v8';
 
 // Initialize global state arrays from Cache or empty if not yet loaded
 window.customers = JSON.parse(localStorage.getItem(KEY_CUST) || '[]');
@@ -43,6 +45,8 @@ window.expenses = JSON.parse(localStorage.getItem(KEY_EXP) || '[]');
 window.staffList = JSON.parse(localStorage.getItem(KEY_STAFF) || '[]');
 window.skips = JSON.parse(localStorage.getItem(KEY_SKIPS) || '[]');
 window.alternateDays = JSON.parse(localStorage.getItem(KEY_ALTS) || '[]');
+window.vehicles = JSON.parse(localStorage.getItem(KEY_VEHICLES) || '[]');
+window.trips = JSON.parse(localStorage.getItem(KEY_TRIPS) || '[]');
 
 const KEY_SETTINGS = 'hh_settings_enterprise_v8';
 const defaultSettings = {
@@ -55,7 +59,8 @@ const defaultSettings = {
     deductMonthly: 220,
     deductTrial: 200,
     whatsappTemplate: "வணக்கம் {name}, உங்களின் நிலுவைத் தொகை ₹{balance} ஆகும். நன்றி!",
-    adminPassword: "1234"
+    adminPassword: "1234",
+    fuelCostPerKm: 10
 };
 window.appSettings = JSON.parse(localStorage.getItem(KEY_SETTINGS)) || {...defaultSettings};
 
@@ -67,7 +72,11 @@ window.deliveryStatus = JSON.parse(localStorage.getItem('hh_deliveries_v8_' + wi
 window.recalculateAllEndDates = function() {
     if (window.customers && typeof recalculateCustomerEndDate === 'function') {
         window.customers.forEach(c => {
-            c.end = recalculateCustomerEndDate(c);
+            try {
+                c.end = recalculateCustomerEndDate(c);
+            } catch (e) {
+                console.error("Error in recalculateCustomerEndDate for", c.id, e);
+            }
         });
     }
 };
@@ -93,6 +102,8 @@ function saveAllToLocalStorageBackup() {
     localStorage.setItem(KEY_STAFF, JSON.stringify(window.staffList));
     localStorage.setItem(KEY_SKIPS, JSON.stringify(window.skips));
     localStorage.setItem(KEY_ALTS, JSON.stringify(window.alternateDays));
+    localStorage.setItem(KEY_VEHICLES, JSON.stringify(window.vehicles));
+    localStorage.setItem(KEY_TRIPS, JSON.stringify(window.trips));
     localStorage.setItem('hh_deliveries_v8_' + window.todayDateStr, JSON.stringify(window.deliveryStatus));
 }
 
@@ -104,9 +115,12 @@ function initRealtimeSync() {
         snapshot.forEach(doc => list.push(doc.data()));
         window.customers = list;
         localStorage.setItem(KEY_CUST, JSON.stringify(list));
-        console.log("Firestore sync: Customers updated", list.length);
+        if (typeof window.hhDebugSnapshotUpdate === 'function') window.hhDebugSnapshotUpdate('customers', list.length, null);
         requestUIRefresh();
-    }, error => console.error("Customers Sync Error:", error));
+    }, error => {
+        console.error("Customers Sync Error:", error);
+        if (typeof window.hhDebugSnapshotUpdate === 'function') window.hhDebugSnapshotUpdate('customers', 0, error.message);
+    });
 
     // Leaves Listener
     db.collection("leaves").onSnapshot(snapshot => {
@@ -114,9 +128,12 @@ function initRealtimeSync() {
         snapshot.forEach(doc => list.push(doc.data()));
         window.leaves = list;
         localStorage.setItem(KEY_LEAVES, JSON.stringify(list));
-        console.log("Firestore sync: Leaves updated", list.length);
+        if (typeof window.hhDebugSnapshotUpdate === 'function') window.hhDebugSnapshotUpdate('leaves', list.length, null);
         requestUIRefresh();
-    }, error => console.error("Leaves Sync Error:", error));
+    }, error => {
+        console.error("Leaves Sync Error:", error);
+        if (typeof window.hhDebugSnapshotUpdate === 'function') window.hhDebugSnapshotUpdate('leaves', 0, error.message);
+    });
 
     // Expenses Listener
     db.collection("expenses").onSnapshot(snapshot => {
@@ -124,9 +141,12 @@ function initRealtimeSync() {
         snapshot.forEach(doc => list.push(doc.data()));
         window.expenses = list;
         localStorage.setItem(KEY_EXP, JSON.stringify(list));
-        console.log("Firestore sync: Expenses updated", list.length);
+        if (typeof window.hhDebugSnapshotUpdate === 'function') window.hhDebugSnapshotUpdate('expenses', list.length, null);
         requestUIRefresh();
-    }, error => console.error("Expenses Sync Error:", error));
+    }, error => {
+        console.error("Expenses Sync Error:", error);
+        if (typeof window.hhDebugSnapshotUpdate === 'function') window.hhDebugSnapshotUpdate('expenses', 0, error.message);
+    });
 
     // Staff Listener
     db.collection("staffs").onSnapshot(snapshot => {
@@ -134,9 +154,38 @@ function initRealtimeSync() {
         snapshot.forEach(doc => list.push(doc.data()));
         window.staffList = list;
         localStorage.setItem(KEY_STAFF, JSON.stringify(list));
-        console.log("Firestore sync: Staff list updated", list.length);
+        if (typeof window.hhDebugSnapshotUpdate === 'function') window.hhDebugSnapshotUpdate('staff', list.length, null);
         requestUIRefresh();
-    }, error => console.error("Staff Sync Error:", error));
+    }, error => {
+        console.error("Staff Sync Error:", error);
+        if (typeof window.hhDebugSnapshotUpdate === 'function') window.hhDebugSnapshotUpdate('staff', 0, error.message);
+    });
+
+    // Vehicles Listener
+    db.collection("vehicles").onSnapshot(snapshot => {
+        const list = [];
+        snapshot.forEach(doc => list.push(doc.data()));
+        window.vehicles = list;
+        localStorage.setItem(KEY_VEHICLES, JSON.stringify(list));
+        if (typeof window.hhDebugSnapshotUpdate === 'function') window.hhDebugSnapshotUpdate('vehicles', list.length, null);
+        requestUIRefresh();
+    }, error => {
+        console.error("Vehicles Sync Error:", error);
+        if (typeof window.hhDebugSnapshotUpdate === 'function') window.hhDebugSnapshotUpdate('vehicles', 0, error.message);
+    });
+
+    // Trips Listener
+    db.collection("trips").onSnapshot(snapshot => {
+        const list = [];
+        snapshot.forEach(doc => list.push(doc.data()));
+        window.trips = list;
+        localStorage.setItem(KEY_TRIPS, JSON.stringify(list));
+        if (typeof window.hhDebugSnapshotUpdate === 'function') window.hhDebugSnapshotUpdate('trips', list.length, null);
+        requestUIRefresh();
+    }, error => {
+        console.error("Trips Sync Error:", error);
+        if (typeof window.hhDebugSnapshotUpdate === 'function') window.hhDebugSnapshotUpdate('trips', 0, error.message);
+    });
 
     // Active deliveries check-off status listener for today
     db.collection("deliveries").doc(window.todayDateStr).onSnapshot(doc => {
@@ -146,7 +195,9 @@ function initRealtimeSync() {
             window.deliveryStatus = {};
         }
         localStorage.setItem('hh_deliveries_v8_' + window.todayDateStr, JSON.stringify(window.deliveryStatus));
-        console.log("Firestore sync: Deliveries checked status updated");
+        if (window.plannerDateStr === window.todayDateStr) {
+            window.plannerDeliveryStatus = window.deliveryStatus;
+        }
         requestUIRefresh();
     }, error => console.error("Deliveries Sync Error:", error));
 
@@ -156,7 +207,7 @@ function initRealtimeSync() {
         snapshot.forEach(doc => list.push(doc.data()));
         window.skips = list;
         localStorage.setItem(KEY_SKIPS, JSON.stringify(list));
-        console.log("Firestore sync: Skips list updated", list.length);
+        if (typeof window.hhDebugSnapshotUpdate === 'function') window.hhDebugSnapshotUpdate('skips', list.length, null);
         requestUIRefresh();
     }, error => console.error("Skips Sync Error:", error));
 
@@ -322,6 +373,46 @@ async function dbSaveSettings(settingsObj) {
         return true;
     } catch (error) {
         console.error("Save settings error:", error);
+        throw error;
+    }
+}
+
+async function dbSaveVehicle(obj) {
+    try {
+        await db.collection("vehicles").doc(obj.id).set(obj);
+        return true;
+    } catch (error) {
+        console.error("Save vehicle error:", error);
+        throw error;
+    }
+}
+
+async function dbDeleteVehicle(id) {
+    try {
+        await db.collection("vehicles").doc(id).delete();
+        return true;
+    } catch (error) {
+        console.error("Delete vehicle error:", error);
+        throw error;
+    }
+}
+
+async function dbSaveTrip(obj) {
+    try {
+        await db.collection("trips").doc(obj.id).set(obj);
+        return true;
+    } catch (error) {
+        console.error("Save trip error:", error);
+        throw error;
+    }
+}
+
+async function dbDeleteTrip(id) {
+    try {
+        await db.collection("trips").doc(id).delete();
+        return true;
+    } catch (error) {
+        console.error("Delete trip error:", error);
         throw error;
     }
 }

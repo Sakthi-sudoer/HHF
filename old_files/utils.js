@@ -1,5 +1,21 @@
 // 🌟 UTILITY HELPER & BUSINESS CALCULATIONS MODULE
 
+// 0. Timezone-Safe Local Date Parsers and Formatters
+window.parseLocalDate = function(dateStr) {
+    if (!dateStr) return null;
+    const parts = dateStr.split('-');
+    if (parts.length !== 3) return new Date(dateStr);
+    return new Date(parseInt(parts[0]), parseInt(parts[1]) - 1, parseInt(parts[2]));
+};
+
+window.formatLocalDate = function(date) {
+    if (!date || isNaN(date.getTime())) return '';
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const d = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+};
+
 // 1. Calculate balance remaining
 function getCustomerBalance(cost, paid) {
     return Math.max(0, (parseFloat(cost) || 0) - (parseFloat(paid) || 0));
@@ -8,7 +24,7 @@ function getCustomerBalance(cost, paid) {
 // 2. Auto-calculate subscription end date (skipping Sundays)
 function calculateEndDate(startDateStr, isTrial) {
     if (!startDateStr) return '';
-    let current = new Date(startDateStr);
+    let current = parseLocalDate(startDateStr);
     let added = (current.getDay() !== 0) ? 1 : 0;
     const daysToDeliver = isTrial ? 6 : 26;
     
@@ -18,23 +34,21 @@ function calculateEndDate(startDateStr, isTrial) {
             added++;
         }
     }
-    return current.toISOString().slice(0, 10);
+    return formatLocalDate(current);
 }
 
 // 3. Check if customer is on leave on a specific date (YYYY-MM-DD)
 function isCustomerOnLeave(custId, dateStr) {
-    const checkDate = new Date(dateStr);
-    checkDate.setHours(0,0,0,0);
-    
     const customerLeaves = window.leaves.filter(l => l.custId === custId);
     
     for (let l of customerLeaves) {
+        if (!l.date || typeof l.date !== 'string') continue;
         // e.g. "2026-07-12 (3 days)"
         const match = l.date.match(/^(\d{4}-\d{2}-\d{2})\s*\((\d+)\s*days\)/);
         if (match) {
             const startDateStr = match[1];
             const days = parseInt(match[2]);
-            const startDate = new Date(startDateStr);
+            const startDate = parseLocalDate(startDateStr);
             
             // Calculate actual dates of the leave range (skipping Sundays)
             let tempDate = new Date(startDate);
@@ -43,7 +57,7 @@ function isCustomerOnLeave(custId, dateStr) {
             
             while (counted < days) {
                 if (tempDate.getDay() !== 0) {
-                    leaveDates.push(tempDate.toISOString().slice(0, 10));
+                    leaveDates.push(formatLocalDate(tempDate));
                     counted++;
                 }
                 tempDate.setDate(tempDate.getDate() + 1);
@@ -89,16 +103,16 @@ function isLeaveCompensated(custId, originalDateStr) {
 async function wasCustomerMissedYesterday(custId) {
     const yesterday = new Date();
     yesterday.setDate(yesterday.getDate() - 1);
-    const yesterdayStr = yesterday.toISOString().slice(0, 10);
+    const yesterdayStr = formatLocalDate(yesterday);
     const isSun = yesterday.getDay() === 0;
     if (isSun) return false;
 
     const c = window.customers.find(item => item.id === custId);
     if (!c || !c.start || !c.end) return false;
 
-    const start = new Date(c.start);
-    const end = new Date(c.end);
-    const yDate = new Date(yesterdayStr);
+    const start = parseLocalDate(c.start);
+    const end = parseLocalDate(c.end);
+    const yDate = parseLocalDate(yesterdayStr);
 
     if (yDate >= start && yDate <= end) {
         if (isCustomerOnLeave(custId, yesterdayStr)) return false;
@@ -168,32 +182,32 @@ function calculateContinuousLeaveExtension() {
 // 4b. Recalculate customer subscription end date dynamically (self-healing timeline)
 function recalculateCustomerEndDate(c) {
     if (!c.start) return '';
-    let current = new Date(c.start);
+    let current = parseLocalDate(c.start);
     let deliveryDaysCount = 0;
     const targetDays = c.isTrial ? 6 : 26;
     
     let iterations = 0;
     while (deliveryDaysCount < targetDays && iterations < 500) {
         iterations++;
-        const dateStr = current.toISOString().slice(0, 10);
+        const dateStr = formatLocalDate(current);
         const isSun = (current.getDay() === 0);
         
         // Check if customer has a leave on this specific day
         const onLeave = window.leaves.some(l => {
-            if (l.custId !== c.id) return false;
+            if (l.custId !== c.id || !l.date || typeof l.date !== 'string') return false;
             // Matches format "YYYY-MM-DD (X days)"
             const match = l.date.match(/^(\d{4}-\d{2}-\d{2})\s*\((\d+)\s*days\)/);
             if (match) {
                 const startStr = match[1];
                 const days = parseInt(match[2]);
-                const startDate = new Date(startStr);
+                const startDate = parseLocalDate(startStr);
                 
                 let temp = new Date(startDate);
                 let counted = 0;
                 const leaveDates = [];
                 while (counted < days) {
                     if (temp.getDay() !== 0) {
-                        leaveDates.push(temp.toISOString().slice(0, 10));
+                        leaveDates.push(formatLocalDate(temp));
                         counted++;
                     }
                     temp.setDate(temp.getDate() + 1);
@@ -217,7 +231,7 @@ function recalculateCustomerEndDate(c) {
             current.setDate(current.getDate() + 1);
         }
     }
-    return current.toISOString().slice(0, 10);
+    return formatLocalDate(current);
 }
 
 // 5. Generate and Print Invoice/Memo Bill
@@ -227,7 +241,7 @@ function printMemoBill(id) {
 
     const matchLeaves = window.leaves.filter(l => l.custId === id);
     const totalLeaveDays = matchLeaves.reduce((acc, l) => {
-        const dMatch = l.date.match(/\((\d+)\s+days\)/);
+        const dMatch = l.date && typeof l.date === 'string' ? l.date.match(/\((\d+)\s+days\)/) : null;
         return acc + (dMatch ? parseInt(dMatch[1]) : 1);
     }, 0);
 
@@ -342,7 +356,7 @@ function downloadCustomerLedger(id) {
 
     const matchLeaves = window.leaves.filter(l => l.custId === id);
     const totalLeaveDays = matchLeaves.reduce((acc, l) => {
-        const dMatch = l.date.match(/\((\d+)\s+days\)/);
+        const dMatch = l.date && typeof l.date === 'string' ? l.date.match(/\((\d+)\s+days\)/) : null;
         return acc + (dMatch ? parseInt(dMatch[1]) : 1);
     }, 0);
 
@@ -613,8 +627,7 @@ function recalculateKitchenGroceryPortions() {
 
     // Filter active subscribers for today (skipping leaves)
     const todayStr = window.todayDateStr;
-    const today = new Date(todayStr);
-    today.setHours(0,0,0,0);
+    const today = parseLocalDate(todayStr);
     const isSunday = today.getDay() === 0;
 
     let totalB = 0, totalL = 0, totalD = 0;
@@ -622,8 +635,8 @@ function recalculateKitchenGroceryPortions() {
     if (!isSunday) {
         window.customers.forEach(c => {
             if (!c.start || !c.end) return;
-            const start = new Date(c.start);
-            const end = new Date(c.end);
+            const start = parseLocalDate(c.start);
+            const end = parseLocalDate(c.end);
             
             // Check if active today
             if (today >= start && today <= end) {
@@ -647,10 +660,48 @@ function recalculateKitchenGroceryPortions() {
     const totalOil = (allMealsCount * oilPortion) / 1000;
 
     // Update DOM
+    const elCountB = document.getElementById('kit-count-breakfast');
+    const elCountL = document.getElementById('kit-count-lunch');
+    const elCountD = document.getElementById('kit-count-dinner');
+    if (elCountB) elCountB.innerText = `${totalB} Portion`;
+    if (elCountL) elCountL.innerText = `${totalL} Portion`;
+    if (elCountD) elCountD.innerText = `${totalD} Portion`;
+
     document.getElementById('kit-sum-rice').innerText = `${totalRice.toFixed(2)} kg`;
     document.getElementById('kit-sum-dal').innerText = `${totalDal.toFixed(2)} kg`;
     document.getElementById('kit-sum-veg').innerText = `${totalVeg.toFixed(2)} kg`;
     document.getElementById('kit-sum-oil').innerText = `${totalOil.toFixed(2)} Litres`;
+
+    // Tomorrow's preparation forecasting
+    const tomVal = parseLocalDate(window.todayDateStr);
+    tomVal.setDate(tomVal.getDate() + 1);
+    const tomorrowStr = formatLocalDate(tomVal);
+    const tomDate = parseLocalDate(tomorrowStr);
+    const isTomorrowSunday = tomDate.getDay() === 0;
+
+    let tomB = 0, tomL = 0, tomD = 0;
+    if (!isTomorrowSunday) {
+        window.customers.forEach(c => {
+            if (c.status !== 'withdrawn' && c.start && c.end) {
+                const start = parseLocalDate(c.start);
+                const end = parseLocalDate(c.end);
+                if (tomDate >= start && tomDate <= end) {
+                    if (!isCustomerOnLeave(c.id, tomorrowStr)) {
+                        if (c.breakfast && !isMealSkipped(c.id, tomorrowStr, 'breakfast')) tomB += (parseInt(c.breakfastQty) || 1);
+                        if (c.lunch && !isMealSkipped(c.id, tomorrowStr, 'lunch')) tomL += (parseInt(c.lunchQty) || 1);
+                        if (c.dinner && !isMealSkipped(c.id, tomorrowStr, 'dinner')) tomD += (parseInt(c.dinnerQty) || 1);
+                    }
+                }
+            }
+        });
+    }
+
+    const forecastBEl = document.getElementById('kit-forecast-b');
+    const forecastLEl = document.getElementById('kit-forecast-l');
+    const forecastDEl = document.getElementById('kit-forecast-d');
+    if (forecastBEl) forecastBEl.innerText = `${tomB} Portions`;
+    if (forecastLEl) forecastLEl.innerText = `${tomL} Portions`;
+    if (forecastDEl) forecastDEl.innerText = `${tomD} Portions`;
 }
 
 // 9. Utility Toast triggers
@@ -676,3 +727,95 @@ function showToast(msg, type = 'success') {
         }, 2500);
     }
 }
+
+// 8. Vehicle & Trip Calculations Helpers
+window.calculateVehicleOdometer = function(vehicleId) {
+    const vehicle = window.vehicles.find(v => v.id === vehicleId);
+    if (!vehicle) return 0;
+    
+    let maxOdo = parseFloat(vehicle.odo) || 0;
+    if (window.trips && window.trips.length > 0) {
+        const vehicleTrips = window.trips.filter(t => t.vehicleId === vehicleId);
+        vehicleTrips.forEach(t => {
+            const end = parseFloat(t.endOdometer) || 0;
+            if (end > maxOdo) maxOdo = end;
+        });
+    }
+    return maxOdo;
+};
+
+window.calculateTripMetrics = function(trip) {
+    const start = parseFloat(trip.startOdometer) || 0;
+    const end = parseFloat(trip.endOdometer) || 0;
+    const distance = Math.max(0, end - start);
+    
+    const fuelCostPerKm = parseFloat(window.appSettings.fuelCostPerKm) || 10;
+    const fuelCost = distance * fuelCostPerKm;
+    
+    const customerIds = trip.customerIds || [];
+    const customersCount = customerIds.length;
+    const costPerDelivery = customersCount > 0 ? fuelCost / customersCount : 0;
+    const costPerCustomer = customersCount > 0 ? fuelCost / customersCount : 0;
+    
+    let mealsCount = 0;
+    customerIds.forEach(custId => {
+        const c = window.customers.find(item => item.id === custId);
+        if (c) {
+            let activeMeals = 0;
+            if (c.breakfast) activeMeals += (parseInt(c.breakfastQty) || 1);
+            if (c.lunch) activeMeals += (parseInt(c.lunchQty) || 1);
+            if (c.dinner) activeMeals += (parseInt(c.dinnerQty) || 1);
+            mealsCount += activeMeals;
+        }
+    });
+    
+    return {
+        distance,
+        fuelCost,
+        customersCount,
+        costPerDelivery,
+        costPerCustomer,
+        mealsCount
+    };
+};
+
+window.getVehicleStats = function(vehicleId) {
+    const vehicle = window.vehicles.find(v => v.id === vehicleId);
+    if (!vehicle) return null;
+    
+    const vTrips = (window.trips || []).filter(t => t.vehicleId === vehicleId);
+    
+    const todayStr = window.todayDateStr;
+    const yesterday = parseLocalDate(todayStr);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = formatLocalDate(yesterday);
+    const currentMonthStr = todayStr.substring(0, 7); // YYYY-MM
+    
+    const todayTrips = vTrips.filter(t => t.date === todayStr).sort((a,b) => (parseInt(a.tripNumber) || 0) - (parseInt(b.tripNumber) || 0));
+    const yesterdayTrips = vTrips.filter(t => t.date === yesterdayStr).sort((a,b) => (parseInt(a.tripNumber) || 0) - (parseInt(b.tripNumber) || 0));
+    const monthlyTrips = vTrips.filter(t => t.date && t.date.startsWith(currentMonthStr)).sort((a,b) => a.date.localeCompare(b.date) || (parseInt(a.tripNumber) || 0) - (parseInt(b.tripNumber) || 0));
+    
+    let totalKm = 0;
+    let totalFuel = 0;
+    let totalDeliveries = 0;
+    
+    vTrips.forEach(t => {
+        const metrics = window.calculateTripMetrics(t);
+        totalKm += metrics.distance;
+        totalFuel += metrics.fuelCost;
+        totalDeliveries += metrics.customersCount;
+    });
+    
+    const averageKmPerTrip = vTrips.length > 0 ? totalKm / vTrips.length : 0;
+    
+    return {
+        todayTrips,
+        yesterdayTrips,
+        monthlyTrips,
+        totalKm,
+        totalFuel,
+        totalDeliveries,
+        averageKmPerTrip
+    };
+};
+
