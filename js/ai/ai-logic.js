@@ -90,12 +90,15 @@ export async function queryGeminiAssistant(apiKey, userMessage, chatHistory = []
 
   // Self-healing attempts list (endpoints and models)
   const attempts = [
+    { ver: "v1beta", model: "gemini-2.5-flash" },
+    { ver: "v1", model: "gemini-2.5-flash" },
+    { ver: "v1beta", model: "gemini-2.0-flash" },
+    { ver: "v1beta", model: "gemini-2.5-pro" },
     { ver: "v1beta", model: "gemini-1.5-flash" },
     { ver: "v1", model: "gemini-1.5-flash" },
-    { ver: "v1beta", model: "gemini-1.5-flash-latest" },
-    { ver: "v1beta", model: "gemini-1.5-pro" },
     { ver: "v1beta", model: "gemini-pro" }
   ];
+
 
   const systemInstruction = `
 You are the Official AI Operations & Financial Analyst for "Healthy Home's Foods".
