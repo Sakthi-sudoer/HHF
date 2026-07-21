@@ -202,6 +202,93 @@ export function sendPreset(text) {
   }
 }
 
+function buildHTMLTable(markdownLines) {
+  const rowsData = markdownLines
+    .map(line => {
+      const cells = line.split('|').map(c => c.trim());
+      if (cells[0] === '') cells.shift();
+      if (cells[cells.length - 1] === '') cells.pop();
+      return cells;
+    })
+    .filter(row => {
+      const joined = row.join('');
+      return !(/^[:\-\s|]+$/.test(joined)) && joined.length > 0;
+    });
+
+  if (rowsData.length === 0) return '';
+
+  const headers = rowsData[0];
+  const bodyRows = rowsData.slice(1);
+
+  let html = `<div class="overflow-x-auto my-2 border dark:border-slate-700 rounded-xl bg-white dark:bg-slate-850 shadow-sm max-w-full"><table class="w-full text-[10px] border-collapse text-left">`;
+  
+  // Header
+  html += `<thead><tr class="bg-slate-50 dark:bg-slate-900 border-b dark:border-slate-700 text-slate-500 dark:text-slate-400 font-bold">`;
+  headers.forEach(h => {
+    html += `<th class="p-2 border-r last:border-r-0 dark:border-slate-750">${h}</th>`;
+  });
+  html += `</tr></thead>`;
+
+  // Body
+  html += `<tbody class="divide-y divide-slate-100 dark:divide-slate-800">`;
+  bodyRows.forEach(row => {
+    html += `<tr class="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 text-slate-700 dark:text-slate-300">`;
+    row.forEach(c => {
+      html += `<td class="p-2 border-r last:border-r-0 dark:border-slate-800">${c}</td>`;
+    });
+    html += `</tr>`;
+  });
+  html += `</tbody></table></div>`;
+
+  return html;
+}
+
+function formatMessageText(text) {
+  const lines = text.split('\n');
+  let segments = [];
+  let currentTable = [];
+
+  for (let line of lines) {
+    if (line.trim().startsWith('|')) {
+      currentTable.push(line);
+    } else {
+      if (currentTable.length > 0) {
+        segments.push({ type: 'table', content: buildHTMLTable(currentTable) });
+        currentTable = [];
+      }
+      segments.push({ type: 'text', content: line });
+    }
+  }
+  if (currentTable.length > 0) {
+    segments.push({ type: 'table', content: buildHTMLTable(currentTable) });
+  }
+
+  const formatted = segments.map(seg => {
+    if (seg.type === 'table') {
+      return seg.content;
+    } else {
+      let t = seg.content;
+
+      // 1. Headings (Indigo, Bold, Underlined)
+      t = t.replace(/###\s*(.*?)(?:\r?\n|$)/g, '<span class="block font-bold text-xs text-indigo-650 dark:text-indigo-400 underline mt-2 mb-0.5">$1</span>');
+      t = t.replace(/##\s*(.*?)(?:\r?\n|$)/g, '<span class="block font-bold text-sm text-indigo-650 dark:text-indigo-400 underline mt-3 mb-1">$1</span>');
+
+      // 2. Bold text (Rose, Bold, Underlined)
+      t = t.replace(/\*\*(.*?)\*\*/g, '<strong class="font-extrabold text-rose-600 dark:text-rose-450 underline">$1</strong>');
+      
+      // 3. Highlight money/numbers (Emerald Green, Bold)
+      t = t.replace(/(₹\s*\d+(?:\.\d+)?|\b\d+\s*(?:Portions|கி.மீ|kg|Litres|நபர்கள்|ரூபாய்|days)\b)/gi, '<span class="font-bold text-emerald-600 dark:text-emerald-400">$1</span>');
+
+      // 4. Italics
+      t = t.replace(/\*(.*?)\*/g, '<em class="italic text-slate-500">$1</em>');
+
+      return t;
+    }
+  });
+
+  return formatted.join('<br>');
+}
+
 function appendMessage(role, text) {
   const container = document.getElementById('ai-messages-container');
   if (!container) return;
@@ -209,29 +296,7 @@ function appendMessage(role, text) {
   const bubble = document.createElement('div');
   bubble.className = "flex items-start space-x-2 " + (role === 'user' ? 'justify-end' : '');
   
-  let formattedText = text;
-
-  if (role === 'model') {
-    // 1. Process Headings to Indigo, Bold, Underlined
-    formattedText = formattedText.replace(/###\s*(.*?)(?:\r?\n|$)/g, '<span class="block font-bold text-xs text-indigo-600 dark:text-indigo-400 underline mt-2 mb-0.5">$1</span>');
-    formattedText = formattedText.replace(/##\s*(.*?)(?:\r?\n|$)/g, '<span class="block font-bold text-sm text-indigo-600 dark:text-indigo-400 underline mt-3 mb-1">$1</span>');
-
-    // 2. Process Bold text to Rose, Bold, Underlined
-    formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong class="font-extrabold text-rose-600 dark:text-rose-450 underline">$1</strong>');
-    
-    // 3. Highlight money/numbers in Emerald Green, Bold
-    formattedText = formattedText.replace(/(₹\s*\d+(?:\.\d+)?|\b\d+\s*(?:Portions|கி.மீ|kg|Litres|நபர்கள்|ரூபாய்|days)\b)/gi, '<span class="font-bold text-emerald-600 dark:text-emerald-400">$1</span>');
-
-    // 4. Line breaks and italics
-    formattedText = formattedText
-      .replace(/\n/g, '<br>')
-      .replace(/\*(.*?)\*/g, '<em class="italic text-slate-500">$1</em>');
-  } else {
-    formattedText = formattedText
-      .replace(/\n/g, '<br>')
-      .replace(/\*\*(.*?)\*\*/g, '<strong class="font-bold">$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em class="italic">$1</em>');
-  }
+  const formattedText = role === 'model' ? formatMessageText(text) : text.replace(/\n/g, '<br>');
 
   if (role === 'user') {
     bubble.innerHTML = `
@@ -251,6 +316,7 @@ function appendMessage(role, text) {
   container.appendChild(bubble);
   container.scrollTop = container.scrollHeight;
 }
+
 
 
 function appendLoadingBubble() {
