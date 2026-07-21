@@ -46,58 +46,58 @@
   <!-- Google-Style Sidebar & Content Wrapper Grid -->
   <div class="flex-1 flex flex-col md:flex-row w-full max-w-7xl mx-auto min-h-[calc(100vh-64px)] relative">
     <!-- LEFT SIDEBAR NAVIGATION (Hover-retractable on desktop) -->
-    <aside id="sidebar-nav" class="group md:w-16 hover:md:w-72 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-750 flex flex-col transition-all duration-300 ease-in-out md:translate-x-0 -translate-x-full fixed md:sticky left-0 top-[64px] h-[calc(100vh-64px)] z-30 shadow-lg md:shadow-none py-4 px-3 space-y-4 overflow-y-auto overflow-x-hidden no-scrollbar">
+    <aside id="sidebar-nav" class="group md:w-16 hover:md:w-72 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-750 flex flex-col transition-all duration-300 ease-in-out md:translate-x-0 -translate-x-full fixed md:sticky left-0 top-[64px] h-[calc(100vh-64px)] z-30 shadow-lg md:shadow-none py-4 px-3 space-y-2 overflow-y-auto overflow-x-hidden no-scrollbar">
       
-      <!-- Core views -->
-      <button id="d-tab-dashboard" onclick="window.appCore.switchView('dashboard')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 text-white shadow">
+      <!-- Dashboard -->
+      <button id="d-tab-dashboard" onclick="window.appCore.switchView('dashboard')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all">
         <i class="fa-solid fa-chart-line text-base w-5 text-center flex-shrink-0"></i>
         <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap" data-i18n="nav.dashboard">Dashboard</span>
       </button>
 
-      <!-- Section: Operations -->
-      <div class="space-y-1 pt-2">
-        <span class="px-3 text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">Operations</span>
-        <button id="d-tab-delivery" onclick="window.appCore.switchView('delivery')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all hidden">
-          <i class="fa-solid fa-clipboard-list text-base w-5 text-center flex-shrink-0"></i>
-          <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap" data-i18n="nav.delivery">Deliveries</span>
-        </button>
-        <button id="d-tab-kitchen" onclick="window.appCore.switchView('kitchen')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all hidden">
-          <i class="fa-solid fa-fire-burner text-base w-5 text-center flex-shrink-0"></i>
-          <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap" data-i18n="nav.kitchen">Kitchen</span>
-        </button>
-        <button id="d-tab-vehicles" onclick="window.appCore.switchView('vehicles')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all hidden">
-          <i class="fa-solid fa-motorcycle text-base w-5 text-center flex-shrink-0"></i>
-          <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap" data-i18n="nav.vehicles">Vehicles</span>
-        </button>
-      </div>
+      <!-- Deliveries -->
+      <button id="d-tab-delivery" onclick="window.appCore.switchView('delivery')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all hidden">
+        <i class="fa-solid fa-clipboard-list text-base w-5 text-center flex-shrink-0"></i>
+        <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap" data-i18n="nav.delivery">Deliveries</span>
+      </button>
 
-      <!-- Section: Financials -->
-      <div class="space-y-1 pt-2">
-        <span class="px-3 text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">Financials</span>
-        <button id="d-tab-customers" onclick="window.appCore.switchView('customers')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all hidden">
-          <i class="fa-solid fa-users text-base w-5 text-center flex-shrink-0"></i>
-          <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap" data-i18n="nav.customers">Customers</span>
-        </button>
-        <button id="d-tab-finance" onclick="window.appCore.switchView('finance')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all hidden">
-          <i class="fa-solid fa-wallet text-base w-5 text-center flex-shrink-0"></i>
-          <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap" data-i18n="nav.finance">Finance</span>
-        </button>
-      </div>
+      <!-- Kitchen -->
+      <button id="d-tab-kitchen" onclick="window.appCore.switchView('kitchen')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all hidden">
+        <i class="fa-solid fa-fire-burner text-base w-5 text-center flex-shrink-0"></i>
+        <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap" data-i18n="nav.kitchen">Kitchen</span>
+      </button>
 
-      <!-- Section: System -->
-      <div class="space-y-1 pt-2">
-        <span class="px-3 text-[9px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest block mb-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">System Control</span>
-        <button id="d-tab-admin" onclick="window.appCore.switchView('admin')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all hidden">
-          <i class="fa-solid fa-table text-base w-5 text-center flex-shrink-0"></i>
-          <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap" data-i18n="nav.admin">Control Panel</span>
-        </button>
-        <button id="d-tab-settings" onclick="window.appCore.switchView('settings')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all">
-          <i class="fa-solid fa-sliders text-base w-5 text-center flex-shrink-0"></i>
-          <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap" data-i18n="nav.settings">Settings</span>
-        </button>
-      </div>
+      <!-- Vehicles -->
+      <button id="d-tab-vehicles" onclick="window.appCore.switchView('vehicles')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all hidden">
+        <i class="fa-solid fa-motorcycle text-base w-5 text-center flex-shrink-0"></i>
+        <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap" data-i18n="nav.vehicles">Vehicles</span>
+      </button>
+
+      <!-- Customers -->
+      <button id="d-tab-customers" onclick="window.appCore.switchView('customers')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all hidden">
+        <i class="fa-solid fa-users text-base w-5 text-center flex-shrink-0"></i>
+        <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap" data-i18n="nav.customers">Customers</span>
+      </button>
+
+      <!-- Finance -->
+      <button id="d-tab-finance" onclick="window.appCore.switchView('finance')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all hidden">
+        <i class="fa-solid fa-wallet text-base w-5 text-center flex-shrink-0"></i>
+        <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap" data-i18n="nav.finance">Finance</span>
+      </button>
+
+      <!-- Control Panel -->
+      <button id="d-tab-admin" onclick="window.appCore.switchView('admin')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all hidden">
+        <i class="fa-solid fa-table text-base w-5 text-center flex-shrink-0"></i>
+        <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap" data-i18n="nav.admin">Control Panel</span>
+      </button>
+
+      <!-- Settings -->
+      <button id="d-tab-settings" onclick="window.appCore.switchView('settings')" class="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all">
+        <i class="fa-solid fa-sliders text-base w-5 text-center flex-shrink-0"></i>
+        <span class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap" data-i18n="nav.settings">Settings</span>
+      </button>
 
     </aside>
+
 
     <!-- PRIMARY WORKSPACE CONTENT AREA -->
     <main class="flex-1 p-4 md:p-6 space-y-6 overflow-y-auto w-full no-scrollbar">

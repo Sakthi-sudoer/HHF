@@ -130,13 +130,30 @@ export function switchView(viewId) {
   if (activeEl) activeEl.classList.remove('hidden');
 
   // Toggle CSS highlight class on sidebar navigation tabs
+  const parentTabMap = {
+    dashboard: 'dashboard',
+    customers: 'customers',
+    delivery: 'delivery',
+    leave: 'delivery',
+    staff: 'delivery',
+    kitchen: 'kitchen',
+    vehicles: 'vehicles',
+    finance: 'finance',
+    expenses: 'finance',
+    profit: 'finance',
+    reports: 'finance',
+    admin: 'admin',
+    settings: 'settings'
+  };
+  const targetHighlight = parentTabMap[viewId] || viewId;
+
   views.forEach(tName => {
     const tabEl = document.getElementById(`d-tab-${tName}`);
     if (tabEl) {
-      if (tName === viewId) {
-        tabEl.className = "w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 text-white shadow";
+      if (tName === targetHighlight) {
+        tabEl.className = "w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-bold bg-emerald-600 text-white shadow";
       } else {
-        tabEl.className = "w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all";
+        tabEl.className = "w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-500 hover:bg-slate-50 dark:text-slate-400 dark:hover:bg-slate-800 transition-all";
       }
     }
   });

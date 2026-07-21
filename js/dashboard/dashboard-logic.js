@@ -1,7 +1,8 @@
 // 🌟 ENTERPRISE DASHBOARD ANALYTICS CORE
 // Compiles real-time metrics, portion audits, and finance aggregates for Chart.js.
 import { dataRegistry } from "../core/accessors.js";
-import { getLocalDateStr } from "../core/shared-utils.js";
+import { formatLocalDate } from "../core/shared-utils.js";
+
 
 /**
  * Compiles revenue vs expenses totals grouped by categories.
@@ -106,7 +107,7 @@ export function getSubscribersPlansData() {
  */
 export function getDeliveryProgressData() {
   const customers = dataRegistry.getCustomers();
-  const todayStr = getLocalDateStr(new Date());
+  const todayStr = formatLocalDate(new Date());
   
   // Deliveries map structure from dataRegistry:
   // e.g. { custId: { breakfast: true, lunch: false } }

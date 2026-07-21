@@ -409,5 +409,40 @@ textarea:focus {
     }
 }
 
+/* 🌟 AMOLED PITCH BLACK THEME FOR DARK MODE */
+.dark, .dark body, .dark #sidebar-nav, .dark main, .dark .bg-slate-900, .dark .bg-slate-800 {
+    background-color: #000000 !important;
+}
+
+.dark .bg-white, 
+.dark .bg-slate-50, 
+.dark .bg-slate-100,
+.dark .bg-slate-900\/40,
+.dark .bg-slate-850,
+.dark #ai-chat-drawer,
+.dark #login-modal > div,
+.dark #fab-menu {
+    background-color: #0c0c0c !important; /* Premium elevated black */
+}
+
+/* AMOLED Borders */
+.dark border, 
+.dark .border, 
+.dark .border-slate-200, 
+.dark .border-slate-700, 
+.dark .border-slate-750, 
+.dark .border-slate-800, 
+.dark .border-slate-850,
+.dark .divide-slate-800 > *,
+.dark .divide-slate-700 > * {
+    border-color: #161616 !important;
+}
+
+/* Chat drawer message bubbles */
+.dark #ai-messages-container .bg-white {
+    background-color: #121212 !important;
+}
+
+
 
 
